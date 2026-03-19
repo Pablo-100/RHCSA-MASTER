@@ -105,7 +105,7 @@ Complete preparation guide for the **RHCSA (EX200)** Red Hat certification. A st
 ### Usage
 ```bash
 # Open in browser
-firefox rhcsa-tbini.html
+rhcsa-master.vercel.app
 # or simply double-click the file
 ```
 
