@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RHCSA Master Guide — TBINI Mustapha Amin</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #EE0000;
+  --red-dark: #990000;
+  --red-glow: #FF2222;
+  --black: #0A0A0A;
+  --dark: #111111;
+  --dark2: #181818;
+  --dark3: #222222;
+  --gray: #333333;
+  --gray2: #555555;
+  --light: #CCCCCC;
+  --white: #F5F5F5;
+  --terminal: #00FF41;
+  --terminal-dim: #00AA2A;
+  --gold: #FFB800;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Space Grotesk', sans-serif;
+  --display: 'Orbitron', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--sans);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ─── CUSTOM CURSOR ─── */
+.cursor {
+  width: 12px; height: 12px;
+  background: var(--red);
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s, background 0.2s;
+  mix-blend-mode: screen;
+}
+.cursor-ring {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(238,0,0,0.5);
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.15s ease-out, width 0.2s, height 0.2s;
+}
+
+/* ─── GRID BACKGROUND ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(238,0,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(238,0,0,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none; z-index: 0;
+}
+
+/* ─── SCANLINES ─── */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+  pointer-events: none; z-index: 1;
+  animation: scanline 8s linear infinite;
+}
+@keyframes scanline {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100px; }
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-thumb { background: var(--red); border-radius: 2px; }
+
+/* ─── HEADER / NAV ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 40px;
+  background: rgba(10,10,10,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(238,0,0,0.2);
+}
+
+.nav-logo {
+  display: flex; align-items: center; gap: 14px;
+  text-decoration: none;
+}
+
+/* ─── RED HAT LOGO SVG ─── */
+.rh-logo {
+  width: 44px; height: 44px;
+  flex-shrink: 0;
+}
+
+.nav-title {
+  font-family: var(--display);
+  font-size: 14px; font-weight: 700;
+  color: var(--white);
+  letter-spacing: 2px;
+  line-height: 1.2;
+}
+.nav-title span { color: var(--red); }
+
+.nav-links {
+  display: flex; gap: 8px;
+  list-style: none;
+}
+.nav-links a {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 500;
+  color: var(--gray2);
+  text-decoration: none;
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+.nav-links a:hover {
+  color: var(--red);
+  border-color: rgba(238,0,0,0.4);
+  background: rgba(238,0,0,0.05);
+}
+
+.nav-author {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--terminal-dim);
+  letter-spacing: 1px;
+}
+.nav-author span { color: var(--terminal); font-weight: 700; }
+
+/* ─── HERO ─── */
+#hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 120px 40px 80px;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.hero-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(238,0,0,0.08) 0%, transparent 70%);
+}
+
+.hero-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(238,0,0,0.1);
+  animation: ring-pulse 4s ease-in-out infinite;
+}
+.hero-ring:nth-child(1) { width: 300px; height: 300px; animation-delay: 0s; }
+.hero-ring:nth-child(2) { width: 500px; height: 500px; animation-delay: 0.5s; }
+.hero-ring:nth-child(3) { width: 700px; height: 700px; animation-delay: 1s; }
+.hero-ring:nth-child(4) { width: 900px; height: 900px; animation-delay: 1.5s; }
+@keyframes ring-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.02); }
+}
+
+/* ─── CENTER LOGO HERO ─── */
+.hero-logo-wrap {
+  position: relative;
+  margin-bottom: 40px;
+  animation: hero-logo-in 1s ease-out forwards;
+}
+@keyframes hero-logo-in {
+  from { opacity: 0; transform: scale(0.8) translateY(-20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.hero-logo-outer {
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  border: 2px solid rgba(238,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  box-shadow: 0 0 60px rgba(238,0,0,0.15), inset 0 0 40px rgba(238,0,0,0.05);
+  animation: logo-rotate-border 8s linear infinite;
+}
+@keyframes logo-rotate-border {
+  0% { box-shadow: 0 0 60px rgba(238,0,0,0.15), 4px 0 30px rgba(238,0,0,0.3); }
+  25% { box-shadow: 0 0 60px rgba(238,0,0,0.15), 0 4px 30px rgba(238,0,0,0.3); }
+  50% { box-shadow: 0 0 60px rgba(238,0,0,0.15), -4px 0 30px rgba(238,0,0,0.3); }
+  75% { box-shadow: 0 0 60px rgba(238,0,0,0.15), 0 -4px 30px rgba(238,0,0,0.3); }
+  100% { box-shadow: 0 0 60px rgba(238,0,0,0.15), 4px 0 30px rgba(238,0,0,0.3); }
+}
+
+.hero-rh-logo {
+  width: 90px; height: 90px;
+}
+
+.hero-badge {
+  position: absolute; top: -8px; right: -8px;
+  background: var(--red);
+  color: white;
+  font-family: var(--mono);
+  font-size: 9px; font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  letter-spacing: 1px;
+  animation: badge-blink 2s ease-in-out infinite;
+}
+@keyframes badge-blink {
+  0%, 100% { box-shadow: 0 0 8px rgba(238,0,0,0.8); }
+  50% { box-shadow: 0 0 20px rgba(238,0,0,1); }
+}
+
+.hero-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--terminal);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  animation: fadein 0.8s 0.3s both;
+}
+.hero-tag::before { content: '> '; }
+.hero-tag::after { content: ' _'; animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.hero-title {
+  font-family: var(--display);
+  font-size: clamp(42px, 8vw, 90px);
+  font-weight: 900;
+  line-height: 0.95;
+  text-align: center;
+  letter-spacing: -2px;
+  animation: fadein 0.8s 0.5s both;
+}
+.hero-title .line1 { color: var(--white); display: block; }
+.hero-title .line2 { color: var(--red); display: block; text-shadow: 0 0 40px rgba(238,0,0,0.5); }
+.hero-title .line3 { color: var(--gray2); display: block; font-size: 0.4em; letter-spacing: 6px; margin-top: 8px; }
+
+.hero-sub {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--gray2);
+  text-align: center;
+  max-width: 600px;
+  line-height: 1.8;
+  margin: 24px 0 40px;
+  animation: fadein 0.8s 0.7s both;
+}
+.hero-sub strong { color: var(--white); }
+
+.hero-author-card {
+  background: rgba(238,0,0,0.05);
+  border: 1px solid rgba(238,0,0,0.2);
+  border-radius: 4px;
+  padding: 14px 28px;
+  display: flex; align-items: center; gap: 16px;
+  animation: fadein 0.8s 0.9s both;
+  margin-bottom: 48px;
+}
+.hero-author-avatar {
+  width: 42px; height: 42px;
+  background: var(--red);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display);
+  font-size: 14px; font-weight: 900;
+  color: white;
+  flex-shrink: 0;
+}
+.hero-author-info { text-align: left; }
+.hero-author-info .name {
+  font-family: var(--display);
+  font-size: 13px; font-weight: 700;
+  color: var(--white); letter-spacing: 1px;
+}
+.hero-author-info .title-a {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--terminal-dim);
+  letter-spacing: 1px;
+}
+
+.hero-stats {
+  display: flex; gap: 32px;
+  animation: fadein 0.8s 1.1s both;
+}
+.hero-stat {
+  text-align: center;
+  padding: 0 16px;
+  border-right: 1px solid var(--gray);
+}
+.hero-stat:last-child { border: none; }
+.hero-stat .num {
+  font-family: var(--display);
+  font-size: 28px; font-weight: 900;
+  color: var(--red);
+  display: block;
+}
+.hero-stat .lbl {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--gray2);
+  letter-spacing: 2px;
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── CHAPTER NAVIGATION ─── */
+#chapters {
+  position: relative; z-index: 2;
+  padding: 60px 40px;
+  background: rgba(17,17,17,0.8);
+  border-top: 1px solid var(--gray);
+  border-bottom: 1px solid var(--gray);
+}
+
+.section-header {
+  text-align: center; margin-bottom: 40px;
+}
+.section-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--terminal);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  display: block; margin-bottom: 8px;
+}
+.section-title {
+  font-family: var(--display);
+  font-size: 28px; font-weight: 700;
+  color: var(--white);
+  letter-spacing: 1px;
+}
+
+.chapters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  max-width: 1200px; margin: 0 auto;
+}
+
+.chapter-card {
+  background: var(--dark2);
+  border: 1px solid var(--gray);
+  border-radius: 4px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-decoration: none;
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+.chapter-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--red);
+  transform: scaleX(0);
+  transition: transform 0.25s;
+}
+.chapter-card:hover { border-color: rgba(238,0,0,0.4); background: rgba(238,0,0,0.05); transform: translateY(-2px); }
+.chapter-card:hover::before { transform: scaleX(1); }
+
+.ch-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--red);
+  letter-spacing: 2px;
+  display: block; margin-bottom: 10px;
+}
+.ch-icon { font-size: 24px; display: block; margin-bottom: 8px; }
+.ch-name {
+  font-family: var(--sans);
+  font-size: 14px; font-weight: 600;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.ch-count {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--gray2);
+}
+
+/* ─── SEARCH ─── */
+#search-section {
+  position: relative; z-index: 2;
+  padding: 40px;
+  background: var(--black);
+}
+.search-wrap {
+  max-width: 700px; margin: 0 auto;
+  position: relative;
+}
+.search-wrap input {
+  width: 100%;
+  background: var(--dark2);
+  border: 1px solid var(--gray);
+  border-radius: 4px;
+  color: var(--white);
+  font-family: var(--mono);
+  font-size: 14px;
+  padding: 16px 20px 16px 50px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-wrap input:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(238,0,0,0.1); }
+.search-wrap input::placeholder { color: var(--gray2); }
+.search-icon {
+  position: absolute; left: 18px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--red); font-size: 18px;
+}
+.search-result-count {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gray2);
+  text-align: center;
+  margin-top: 10px;
+  letter-spacing: 1px;
+}
+.search-result-count span { color: var(--terminal); }
+
+/* ─── COMMANDS SECTION ─── */
+#commands {
+  position: relative; z-index: 2;
+  padding: 40px;
+  max-width: 1300px; margin: 0 auto;
+}
+
+.chapter-section { margin-bottom: 80px; }
+
+.chapter-title-bar {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--gray);
+  position: relative;
+}
+.chapter-title-bar::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 0;
+  width: 80px; height: 1px;
+  background: var(--red);
+}
+.ch-title-icon { font-size: 28px; }
+.ch-title-text {
+  font-family: var(--display);
+  font-size: 20px; font-weight: 700;
+  color: var(--white);
+}
+.ch-title-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--terminal);
+  letter-spacing: 2px;
+  margin-left: auto;
+}
+
+/* ─── CMD CARDS ─── */
+.cmd-grid {
+  display: flex; flex-direction: column;
+  gap: 12px;
+}
+
+.cmd-block {
+  background: var(--dark2);
+  border: 1px solid var(--gray);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.cmd-block:hover { border-color: rgba(238,0,0,0.3); }
+
+.cmd-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.cmd-header:hover { background: rgba(238,0,0,0.03); }
+
+.cmd-prompt {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--red);
+  flex-shrink: 0;
+}
+.cmd-name {
+  font-family: var(--mono);
+  font-size: 15px; font-weight: 700;
+  color: var(--white);
+  flex: 0 0 auto;
+  min-width: 160px;
+}
+.cmd-short {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--gray2);
+  flex: 1;
+}
+.cmd-toggle {
+  font-size: 12px;
+  color: var(--gray2);
+  transition: transform 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.cmd-block.open .cmd-toggle { transform: rotate(180deg); color: var(--red); }
+
+.cmd-body {
+  display: none;
+  border-top: 1px solid var(--gray);
+}
+.cmd-block.open .cmd-body { display: block; }
+
+.cmd-desc-bar {
+  padding: 14px 20px;
+  background: rgba(0,255,65,0.03);
+  border-bottom: 1px solid var(--gray);
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--light);
+  line-height: 1.7;
+}
+.cmd-desc-bar strong { color: var(--white); }
+
+/* ─── SYNTAX ─── */
+.cmd-syntax-bar {
+  padding: 10px 20px;
+  background: rgba(238,0,0,0.04);
+  border-bottom: 1px solid var(--gray);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+}
+.cmd-syntax-bar .label { color: var(--gray2); margin-right: 8px; font-size: 10px; letter-spacing: 2px; }
+
+/* ─── EXAMPLES ─── */
+.examples-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+
+.example-item {
+  background: var(--dark);
+  border: 1px solid var(--gray);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ex-top {
+  padding: 8px 14px 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--gray2);
+  letter-spacing: 1px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ex-note-text {
+  padding: 4px 14px 10px;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--gray2);
+  font-style: italic;
+  border-top: none;
+}
+
+/* Terminal block */
+.terminal-block {
+  background: var(--black);
+  border: 1px solid rgba(0,255,65,0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0 14px 10px;
+}
+.terminal-topbar {
+  background: var(--dark3);
+  padding: 6px 12px;
+  display: flex; align-items: center; gap: 6px;
+  border-bottom: 1px solid rgba(0,255,65,0.1);
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot.r { background: #FF5F56; }
+.dot.y { background: #FFBD2E; }
+.dot.g { background: #27C93F; }
+.terminal-filename { font-family: var(--mono); font-size: 10px; color: var(--gray2); margin-left: auto; }
+
+.terminal-input {
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.terminal-input .prompt { color: var(--terminal-dim); }
+.terminal-input .prompt-sym { color: var(--red); }
+.terminal-input .cmd-text { color: var(--white); }
+.terminal-input .flag { color: #89B4FA; }
+.terminal-input .arg { color: #A6E3A1; }
+.terminal-input .path { color: #F9E2AF; }
+.terminal-input .pipe { color: var(--red); }
+
+.terminal-output {
+  padding: 0 14px 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--terminal-dim);
+  border-top: 1px dashed rgba(0,255,65,0.1);
+  margin-top: 4px;
+}
+.terminal-output .out-head { color: var(--gold); font-weight: 700; }
+.terminal-output .out-hi { color: var(--terminal); }
+.terminal-output .out-red { color: var(--red); }
+.terminal-output .out-blue { color: #89B4FA; }
+.terminal-output .out-dim { color: var(--gray2); }
+.terminal-output .out-white { color: var(--white); }
+
+/* ─── FOOTER ─── */
+footer {
+  position: relative; z-index: 2;
+  border-top: 1px solid var(--gray);
+  padding: 40px;
+  text-align: center;
+  background: var(--dark2);
+}
+.footer-logo-row {
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  margin-bottom: 16px;
+}
+.footer-title {
+  font-family: var(--display);
+  font-size: 16px; font-weight: 700;
+  color: var(--white);
+}
+.footer-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gray2);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.footer-dev {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--terminal);
+}
+.footer-dev span { color: var(--red); font-weight: 700; }
+
+/* ─── FLOATING TOC ─── */
+#toc {
+  position: fixed; right: 20px; top: 50%;
+  transform: translateY(-50%);
+  z-index: 500;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.toc-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--gray);
+  border: 1px solid var(--gray2);
+  cursor: pointer;
+  transition: all 0.2s;
+  title: attr(data-title);
+}
+.toc-dot:hover, .toc-dot.active {
+  background: var(--red);
+  border-color: var(--red);
+  box-shadow: 0 0 8px var(--red);
+  transform: scale(1.4);
+}
+
+/* ─── TOP BUTTON ─── */
+#top-btn {
+  position: fixed; bottom: 30px; right: 30px;
+  z-index: 500;
+  background: var(--red);
+  color: white;
+  border: none;
+  width: 44px; height: 44px;
+  border-radius: 2px;
+  font-size: 18px;
+  cursor: pointer;
+  display: none;
+  align-items: center; justify-content: center;
+  box-shadow: 0 0 20px rgba(238,0,0,0.4);
+  transition: background 0.2s;
+}
+#top-btn:hover { background: var(--red-dark); }
+#top-btn.show { display: flex; }
+
+/* ─── UTILITIES ─── */
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">
+    <!-- Red Hat Logo SVG -->
+    <svg class="rh-logo" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="30" cy="30" r="28" fill="#EE0000"/>
+      <!-- Hat brim -->
+      <ellipse cx="30" cy="38" rx="22" ry="6" fill="#1A1A1A"/>
+      <!-- Hat crown -->
+      <rect x="16" y="18" width="28" height="20" rx="3" fill="#1A1A1A"/>
+      <!-- Hat band -->
+      <rect x="14" y="34" width="32" height="5" rx="1" fill="#CC0000"/>
+      <!-- White shadow shape on hat -->
+      <ellipse cx="26" cy="24" rx="6" ry="4" fill="rgba(255,255,255,0.08)" transform="rotate(-15 26 24)"/>
+    </svg>
+    <div>
+      <div class="nav-title">RHCSA <span>MASTER</span></div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#chapters">CHAPITRES</a></li>
+    <li><a href="#commands">COMMANDES</a></li>
+  </ul>
+  <div class="nav-author">DEV : <span>TBINI M. AMIN</span></div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-ring"></div><div class="hero-ring"></div>
+  <div class="hero-ring"></div><div class="hero-ring"></div>
+
+  <div class="hero-logo-wrap">
+    <div class="hero-logo-outer">
+      <svg class="hero-rh-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" fill="#EE0000"/>
+        <!-- Shadow/depth -->
+        <circle cx="50" cy="50" r="46" fill="url(#hero-grad)" opacity="0.3"/>
+        <defs>
+          <radialGradient id="hero-grad" cx="35%" cy="35%">
+            <stop offset="0%" stop-color="white" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="black" stop-opacity="0.2"/>
+          </radialGradient>
+        </defs>
+        <!-- Brim -->
+        <ellipse cx="50" cy="62" rx="36" ry="9" fill="#111"/>
+        <!-- Crown -->
+        <rect x="24" y="28" width="52" height="34" rx="5" fill="#111"/>
+        <!-- Band -->
+        <rect x="22" y="56" width="56" height="8" rx="2" fill="#CC0000"/>
+        <!-- Shine on crown -->
+        <ellipse cx="42" cy="36" rx="10" ry="6" fill="rgba(255,255,255,0.07)" transform="rotate(-20 42 36)"/>
+        <!-- White star/shadow on brim -->
+        <ellipse cx="44" cy="64" rx="8" ry="3" fill="rgba(255,255,255,0.06)"/>
+      </svg>
+      <div class="hero-badge">EX200</div>
+    </div>
+  </div>
+
+  <div class="hero-tag">Red Hat Certified System Administrator</div>
+
+  <h1 class="hero-title">
+    <span class="line1">RHCSA</span>
+    <span class="line2">MASTER</span>
+    <span class="line3">GUIDE COMPLET</span>
+  </h1>
+
+  <p class="hero-sub">
+    Le guide <strong>ultime</strong> de préparation à la certification RHCSA.<br>
+    Toutes les commandes · Exemples réels · Outputs détaillés · De 0 à Expert
+  </p>
+
+  <div class="hero-author-card">
+    <div class="hero-author-avatar">TM</div>
+    <div class="hero-author-info">
+      <div class="name">TBINI MUSTAPHA AMIN</div>
+      <div class="title-a">$ RHCSA GUIDE AUTHOR · LINUX ENGINEER</div>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="num" id="stat-cmds">80+</span><span class="lbl">COMMANDES</span></div>
+    <div class="hero-stat"><span class="num">12</span><span class="lbl">CHAPITRES</span></div>
+    <div class="hero-stat"><span class="num">200+</span><span class="lbl">EXEMPLES</span></div>
+    <div class="hero-stat"><span class="num">100%</span><span class="lbl">EX200</span></div>
+  </div>
+</section>
+
+<!-- CHAPTERS OVERVIEW -->
+<section id="chapters">
+  <div class="section-header">
+    <span class="section-label">// programme</span>
+    <h2 class="section-title">CHAPITRES DE LA CERTIFICATION</h2>
+  </div>
+  <div class="chapters-grid" id="chapters-grid"></div>
+</section>
+
+<!-- SEARCH -->
+<div id="search-section">
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="search" placeholder="Rechercher une commande... ex: chmod, systemctl, podman" oninput="filterCmds()">
+    <div class="search-result-count" id="result-count"></div>
+  </div>
+</div>
+
+<!-- COMMANDS -->
+<main id="commands"></main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo-row">
+    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="46" fill="#EE0000"/>
+      <ellipse cx="50" cy="62" rx="36" ry="9" fill="#111"/>
+      <rect x="24" y="28" width="52" height="34" rx="5" fill="#111"/>
+      <rect x="22" y="56" width="56" height="8" rx="2" fill="#CC0000"/>
+    </svg>
+    <div class="footer-title">RHCSA MASTER GUIDE</div>
+  </div>
+  <div class="footer-sub">Red Hat Certified System Administrator — EX200</div>
+  <div class="footer-dev">Développé par <span>TBINI MUSTAPHA AMIN</span> · 2025</div>
+</footer>
+
+<!-- TOC & TOP -->
+<div id="toc"></div>
+<button id="top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// ─── DATA ───
+const chapters = [
+  { id:'files', icon:'📁', name:'Fichiers & Navigation', short:'ls, cd, find, grep, tar, vim', color:'#4CAF50' },
+  { id:'users', icon:'👤', name:'Utilisateurs & Groupes', short:'useradd, passwd, sudo', color:'#9C27B0' },
+  { id:'perms', icon:'🔒', name:'Permissions & ACL', short:'chmod, chown, setfacl', color:'#FF9800' },
+  { id:'storage', icon:'💾', name:'Stockage & LVM', short:'fdisk, mkfs, lvcreate', color:'#2196F3' },
+  { id:'network', icon:'🌐', name:'Réseau', short:'ip, nmcli, ss, firewalld', color:'#00BCD4' },
+  { id:'services', icon:'⚙️', name:'Services systemd', short:'systemctl, journalctl, cron', color:'#FF5722' },
+  { id:'process', icon:'🔄', name:'Processus', short:'ps, kill, nice, jobs', color:'#E91E63' },
+  { id:'selinux', icon:'🛡️', name:'SELinux', short:'getenforce, chcon, audit2allow', color:'#F44336' },
+  { id:'firewall', icon:'🔥', name:'Pare-feu', short:'firewall-cmd, zones, ports', color:'#FF6D00' },
+  { id:'containers', icon:'📦', name:'Containers Podman', short:'podman run, systemd, volumes', color:'#1565C0' },
+  { id:'boot', icon:'🚀', name:'Boot & Recovery', short:'GRUB2, targets, root reset', color:'#827717' },
+  { id:'scripting', icon:'📝', name:'Scripting Bash', short:'variables, boucles, pipes', color:'#2E7D32' },
+];
+
+const cmds = [
+// ── FILES ──
+{ cat:'files', cmd:'ls', syntax:'ls [OPTIONS] [PATH]', short:'Lister le contenu d\'un répertoire', desc:'Commande fondamentale pour lister les fichiers. <strong>-la</strong> est la combinaison la plus utilisée : liste TOUT (fichiers cachés) avec tous les détails.', examples:[
+  { note:'Lister avec tous les détails + fichiers cachés', input:'ls -la /etc',
+    output:`total 1092
+<span class="out-hi">drwxr-xr-x.</span> 142 root root  8192 Jan 15 09:23 <span class="out-blue">.</span>
+<span class="out-hi">drwxr-xr-x.</span>  18 root root   235 Jan 10 08:00 <span class="out-blue">..</span>
+<span class="out-hi">-rw-r--r--.</span>   1 root root    16 Jan 10 08:00 hostname
+<span class="out-hi">-rw-r--r--.</span>   1 root root   158 Jan 10 08:00 hosts
+<span class="out-hi">drwxr-xr-x.</span>   2 root root    22 Jan 10 08:00 <span class="out-blue">ssh</span>
+<span class="out-hi">-rw-r--r--.</span>   1 root root  4328 Jan 14 11:30 passwd` },
+  { note:'Taille lisible (KB/MB) + type de filesystem', input:'ls -lhT /var/log',
+    output:`total 48M
+<span class="out-hi">-rw-------</span> 1 root root <span class="out-red"> 12M</span> Jan 15 09:00 messages
+<span class="out-hi">-rw-------</span> 1 root root <span class="out-red">3.2M</span> Jan 15 08:55 secure
+<span class="out-hi">-rw-r--r--</span> 1 root root <span class="out-red">892K</span> Jan 15 07:20 cron` },
+  { note:'Trié par date (plus récent en premier)', input:'ls -lt /tmp',
+    output:`total 0
+<span class="out-hi">-rw-r--r--</span> 1 john john 0 Jan 15 <span class="out-gold">09:45</span> newfile.txt
+<span class="out-hi">-rw-r--r--</span> 1 root root 0 Jan 15 <span class="out-gold">08:30</span> tmpfile` },
+]},
+
+{ cat:'files', cmd:'find', syntax:'find [PATH] [OPTIONS] [EXPRESSION]', short:'Rechercher des fichiers selon des critères', desc:'La commande de recherche la plus puissante. Critères : nom, taille, propriétaire, permissions, date de modification. <strong>Indispensable à l\'examen RHCSA !</strong>', examples:[
+  { note:'Tous les fichiers .conf sur le système', input:'find / -name "*.conf" -type f 2>/dev/null',
+    output:`/etc/ssh/sshd_config
+/etc/httpd/conf/httpd.conf
+/etc/nginx/nginx.conf
+/etc/rsyslog.conf
+/etc/logrotate.conf` },
+  { note:'Fichiers modifiés dans les 7 derniers jours', input:'find /home -mtime -7 -type f',
+    output:`/home/john/.bash_history
+/home/john/documents/rapport.txt
+/home/alice/project/main.py` },
+  { note:'Trouver tous les fichiers SUID (vulnérabilité potentielle)', input:'find / -perm -4000 -type f 2>/dev/null',
+    output:`/usr/bin/passwd
+/usr/bin/sudo
+/usr/bin/su
+/usr/bin/ping` },
+  { note:'Fichiers > 100MB et exécuter une action', input:'find /var -size +100M -exec ls -lh {} \\;',
+    output:`<span class="out-red">-rw-------</span> 1 root root <span class="out-gold">234M</span> Jan 15 09:00 /var/log/messages.old` },
+]},
+
+{ cat:'files', cmd:'grep', syntax:'grep [OPTIONS] PATTERN [FILE]', short:'Rechercher des patterns dans des fichiers', desc:'Recherche de texte avec expressions régulières. Souvent combiné avec pipe. <strong>-v</strong> (inverse), <strong>-r</strong> (récursif), <strong>-n</strong> (numéros de lignes) sont les options clés.', examples:[
+  { note:'Filtrer les lignes non-commentées d\'un fichier de config', input:"grep -v '^#' /etc/ssh/sshd_config | grep -v '^$'",
+    output:`Port 22
+AddressFamily any
+ListenAddress 0.0.0.0
+PermitRootLogin no
+PasswordAuthentication yes
+ChallengeResponseAuthentication no` },
+  { note:'Chercher récursivement avec numéros de ligne', input:'grep -rn "PermitRootLogin" /etc/ssh/',
+    output:`<span class="out-blue">/etc/ssh/sshd_config</span>:<span class="out-red">38</span>:#PermitRootLogin prohibit-password
+<span class="out-blue">/etc/ssh/sshd_config</span>:<span class="out-red">39</span>:PermitRootLogin no` },
+  { note:'Compter les connexions échouées (logs de sécurité)', input:'grep -c "Failed password" /var/log/secure',
+    output:`<span class="out-red">147</span>` },
+]},
+
+{ cat:'files', cmd:'tar', syntax:'tar [OPTIONS] ARCHIVE [FILES]', short:'Archiver et compresser des fichiers', desc:'Outil d\'archivage principal sous Linux. Mémo : <strong>czf = créer gzip</strong>, <strong>xzf = extraire gzip</strong>, <strong>tzf = lister</strong>. Le <strong>z</strong> = gzip, <strong>j</strong> = bzip2, <strong>J</strong> = xz.', examples:[
+  { note:'Créer une archive compressée du home', input:'tar -czf /backup/home_backup.tar.gz /home/john',
+    output:`tar: Removing leading '/' from member names
+<span class="out-dim">home/john/
+home/john/.bashrc
+home/john/documents/
+home/john/documents/file1.txt</span>` },
+  { note:'Lister le contenu sans extraire', input:'tar -tzf /backup/home_backup.tar.gz',
+    output:`<span class="out-hi">home/john/
+home/john/.bashrc
+home/john/documents/
+home/john/documents/file1.txt
+home/john/.ssh/</span>` },
+  { note:'Extraire dans un répertoire spécifique', input:'tar -xzf /backup/home_backup.tar.gz -C /restore/',
+    output:`<span class="out-dim">[Extraction silencieuse — pas d'output si succès]
+Pour voir les fichiers extraits : ls /restore/home/john/</span>` },
+]},
+
+{ cat:'files', cmd:'vim', syntax:'vim [FILE]', short:'Éditeur de texte avancé', desc:'Éditeur incontournable à l\'examen. 3 modes : <strong>Normal</strong> (navigation), <strong>Insert</strong> (écriture après i/a/o), <strong>Commande</strong> (après :). Maîtriser les commandes essentielles est OBLIGATOIRE.', examples:[
+  { note:'Commandes essentielles vim à mémoriser', input:'vim /etc/ssh/sshd_config',
+    output:`<span class="out-head">── MODE NORMAL (touches) ──</span>
+<span class="out-hi">i</span>         → Mode insertion (avant curseur)
+<span class="out-hi">a</span>         → Mode insertion (après curseur)
+<span class="out-hi">o</span>         → Nouvelle ligne en dessous + insertion
+<span class="out-hi">Esc</span>       → Retour au mode normal
+<span class="out-hi">dd</span>        → Supprimer la ligne courante
+<span class="out-hi">yy</span>        → Copier la ligne courante
+<span class="out-hi">p</span>         → Coller après le curseur
+<span class="out-hi">u</span>         → Annuler (undo)
+<span class="out-hi">Ctrl+r</span>    → Refaire (redo)
+<span class="out-hi">/motcle</span>   → Chercher, n=suivant, N=précédent
+
+<span class="out-head">── MODE COMMANDE (:) ──</span>
+<span class="out-hi">:w</span>         → Sauvegarder
+<span class="out-hi">:q</span>         → Quitter
+<span class="out-hi">:wq</span>        → Sauvegarder et quitter
+<span class="out-hi">:q!</span>        → Quitter SANS sauvegarder
+<span class="out-hi">:set number</span> → Afficher les numéros de lignes
+<span class="out-hi">:%s/old/new/g</span> → Remplacer partout` },
+]},
+
+// ── USERS ──
+{ cat:'users', cmd:'useradd', syntax:'useradd [OPTIONS] USERNAME', short:'Créer un nouvel utilisateur', desc:'Crée un utilisateur avec ses paramètres. Sans options, l\'utilisateur n\'a pas de home ni de mot de passe utilisable. Toujours définir un mot de passe avec <strong>passwd</strong> ensuite.', examples:[
+  { note:'Créer un utilisateur complet avec tous les paramètres', input:'useradd -m -s /bin/bash -G wheel,docker -c "John Doe" john',
+    output:`<span class="out-dim">[Aucun output si succès — vérifier avec :]</span>
+<span class="out-hi">id john</span>
+uid=1001(john) gid=1001(john) groups=1001(john),10(wheel),989(docker)` },
+  { note:'Créer avec UID spécifique et date d\'expiration', input:'useradd -u 2000 -e 2025-12-31 -c "Temp User" tempuser',
+    output:`<span class="out-dim">[Vérifier :]</span>
+<span class="out-hi">chage -l tempuser</span>
+Last password change               : Jan 15, 2025
+Account expires                    : <span class="out-red">Dec 31, 2025</span>
+Password expires                   : never` },
+  { note:'Voir l\'entrée créée dans /etc/passwd', input:'tail -3 /etc/passwd',
+    output:`<span class="out-hi">john:x:1001:1001:John Doe:/home/john:/bin/bash</span>
+<span class="out-dim">tempuser:x:2000:2000:Temp User:/home/tempuser:/bin/bash</span>` },
+]},
+
+{ cat:'users', cmd:'usermod', syntax:'usermod [OPTIONS] USERNAME', short:'Modifier un utilisateur existant', desc:'Modifie un compte existant. <strong>ATTENTION</strong> : toujours utiliser <strong>-a</strong> avec <strong>-G</strong> sinon tu supprimes les groupes existants !', examples:[
+  { note:'Ajouter un utilisateur à des groupes supplémentaires', input:'usermod -aG wheel,developers john',
+    output:`<span class="out-dim">[Vérifier les groupes :]</span>
+<span class="out-hi">id john</span>
+uid=1001(john) gid=1001(john) groups=1001(john),10(<span class="out-gold">wheel</span>),1002(<span class="out-gold">developers</span>)` },
+  { note:'Verrouiller un compte utilisateur', input:'usermod -L john\npasswd -S john',
+    output:`john <span class="out-red">LK</span> 2025-01-15 0 99999 7 -1 (Password locked.)` },
+  { note:'Déverrouiller et vérifier', input:'usermod -U john\npasswd -S john',
+    output:`john <span class="out-hi">PS</span> 2025-01-15 0 99999 7 -1 (Password set, SHA512 crypt.)` },
+]},
+
+{ cat:'users', cmd:'passwd + chage', syntax:'passwd [OPTIONS] [USER]', short:'Gérer les mots de passe et l\'expiration', desc:'passwd = changer/gérer les mots de passe. chage = gérer les politiques d\'expiration. Les deux sont souvent demandés ensemble à l\'examen.', examples:[
+  { note:'Forcer le changement de mdp à la prochaine connexion', input:'passwd -e john',
+    output:`Expiring password for user john.
+passwd: Success` },
+  { note:'Configurer la politique d\'expiration complète', input:'chage -M 90 -m 7 -W 14 john\nchage -l john',
+    output:`Last password change                    : Jan 15, 2025
+Password expires                        : <span class="out-gold">Apr 15, 2025</span>
+Password inactive                       : never
+Account expires                         : never
+Minimum number of days between changes  : <span class="out-hi">7</span>
+Maximum number of days between changes  : <span class="out-hi">90</span>
+Number of days of warning before expiry : <span class="out-hi">14</span>` },
+]},
+
+// ── PERMISSIONS ──
+{ cat:'perms', cmd:'chmod', syntax:'chmod [OPTIONS] MODE FILE', short:'Modifier les permissions d\'accès', desc:'Deux notations : <strong>octal</strong> (755, 644...) et <strong>symbolique</strong> (u+x, go-w...). L\'octal est plus rapide à l\'examen. Mémo : <strong>4=r, 2=w, 1=x</strong>. SUID=4, SGID=2, Sticky=1.', examples:[
+  { note:'Permissions courantes à connaître par cœur', input:'chmod 755 /script.sh\nls -la /script.sh',
+    output:`<span class="out-hi">-rwxr-xr-x</span>. 1 root root 128 Jan 15 09:00 /script.sh
+<span class="out-dim">  ↑ proprio: rwx=7  groupe: r-x=5  autres: r-x=5</span>` },
+  { note:'Fichier de config sécurisé (lecture seule propriétaire)', input:'chmod 600 ~/.ssh/id_rsa\nls -la ~/.ssh/',
+    output:`<span class="out-red">-rw-------</span>. 1 john john 1679 Jan 10 08:00 id_rsa
+<span class="out-hi">-rw-r--r--</span>. 1 john john  399 Jan 10 08:00 id_rsa.pub` },
+  { note:'SUID — s\'exécute avec les droits du propriétaire', input:'chmod 4755 /usr/local/bin/myapp\nls -la /usr/local/bin/myapp',
+    output:`<span class="out-gold">-rwsr-xr-x</span>. 1 root root 12345 Jan 15 09:00 /usr/local/bin/myapp
+<span class="out-dim">  ↑ Le 's' à la place du 'x' du propriétaire = SUID actif</span>` },
+  { note:'Sticky bit sur /tmp (seul le proprio peut supprimer)', input:'chmod 1777 /shared\nls -ld /shared',
+    output:`<span class="out-hi">drwxrwxrw<span class="out-gold">t</span></span>. 2 root root 6 Jan 15 09:00 /shared
+<span class="out-dim">  ↑ Le 't' à la place du 'x' des autres = sticky bit actif</span>` },
+]},
+
+{ cat:'perms', cmd:'setfacl / getfacl', syntax:'setfacl [OPTIONS] RULE FILE', short:'Permissions ACL avancées', desc:'Les ACL permettent des permissions précises pour des utilisateurs/groupes spécifiques au-delà du modèle classique. Utile pour partager des ressources entre plusieurs équipes.', examples:[
+  { note:'Donner des droits à un utilisateur spécifique', input:'setfacl -m u:john:rwx /shared/project\ngetfacl /shared/project',
+    output:`# file: shared/project
+# owner: root
+# group: devs
+user::rwx
+user:<span class="out-hi">john:rwx</span>
+group::r-x
+mask::rwx
+other::r-x` },
+  { note:'ACL par défaut (héritage pour nouveaux fichiers)', input:'setfacl -d -m g:developers:rwx /shared\ngetfacl /shared | grep default',
+    output:`default:user::rwx
+default:group::r-x
+default:<span class="out-hi">group:developers:rwx</span>
+default:mask::rwx
+default:other::r-x` },
+]},
+
+// ── STORAGE ──
+{ cat:'storage', cmd:'LVM complet', syntax:'pvcreate → vgcreate → lvcreate', short:'Gestion complète des volumes logiques', desc:'LVM = couche d\'abstraction entre le matériel et les systèmes de fichiers. Permet de <strong>redimensionner à chaud</strong>. Workflow : PV → VG → LV → mkfs → mount. <strong>Sujet majeur de l\'examen !</strong>', examples:[
+  { note:'Workflow complet : créer et monter un LV', input:`pvcreate /dev/sdb
+vgcreate datavg /dev/sdb
+lvcreate -L 10G -n datalv datavg
+mkfs.xfs /dev/datavg/datalv
+mkdir /data
+mount /dev/datavg/datalv /data`,
+    output:`<span class="out-hi">  Physical volume "/dev/sdb" successfully created.</span>
+<span class="out-hi">  Volume group "datavg" successfully created</span>
+<span class="out-hi">  Logical volume "datalv" created.</span>
+meta-data=/dev/datavg/datalv isize=512 agcount=4
+<span class="out-terminal">[ OK ]</span> Mounted /dev/datavg/datalv → /data` },
+  { note:'Étendre un LV et redimensionner le filesystem XFS', input:'lvextend -L +5G /dev/datavg/datalv\nxfs_growfs /data',
+    output:`  Size of logical volume datavg/datalv changed from <span class="out-gold">10.00 GiB</span> to <span class="out-hi">15.00 GiB</span>.
+  Logical volume datavg/datalv successfully resized.
+data blocks changed from 2621440 to <span class="out-hi">3932160</span>` },
+  { note:'Vérifier l\'état de tous les LVM', input:'pvs && vgs && lvs',
+    output:`<span class="out-head">PV         VG     Fmt  PVSize  PVFree</span>
+/dev/sda2  rhel   lvm2  <span class="out-gold">19.00g</span>     0
+/dev/sdb   datavg lvm2  <span class="out-gold">20.00g</span> 5.00g
+
+<span class="out-head">VG     #PV #LV #SN  VSize   VFree</span>
+datavg   1   1   0  <span class="out-gold">&lt;20.00g</span> 5.00g
+
+<span class="out-head">LV     VG     Attr       LSize</span>
+datalv datavg <span class="out-hi">-wi-ao----</span> <span class="out-gold">15.00g</span>` },
+]},
+
+{ cat:'storage', cmd:'/etc/fstab', syntax:'device  mountpoint  fstype  options  dump  fsck', short:'Montage automatique au démarrage', desc:'Fichier critique — une erreur peut empêcher le système de démarrer. Utiliser les <strong>UUID</strong> plutôt que /dev/sdX (qui peut changer). Tester avec <strong>mount -a</strong> avant de rebooter !', examples:[
+  { note:'Récupérer l\'UUID et configurer le fstab', input:'blkid /dev/datavg/datalv\n# Ajouter la ligne dans /etc/fstab :',
+    output:`/dev/datavg/datalv: UUID="<span class="out-gold">a1b2c3d4-e5f6-7890-abcd-ef1234567890</span>" TYPE="xfs"
+
+<span class="out-head"># /etc/fstab :</span>
+<span class="out-hi">UUID=a1b2c3d4-e5f6-7890-abcd-ef1234567890  /data  xfs  defaults  0 2</span>
+<span class="out-dim">#  ↑ device          ↑ mount   ↑ fs   ↑ opts ↑dump ↑fsck</span>` },
+  { note:'Tester le fstab sans rebooter', input:'mount -a && df -hT | grep /data',
+    output:`Filesystem                     Type  Size  Used Avail Use% Mounted on
+/dev/mapper/datavg-datalv     <span class="out-hi">xfs</span>    15G  175M   15G   2% <span class="out-gold">/data</span>` },
+]},
+
+// ── NETWORK ──
+{ cat:'network', cmd:'nmcli', syntax:'nmcli [OPTIONS] OBJECT COMMAND', short:'Configurer le réseau de façon persistante', desc:'NetworkManager CLI — les changements survivent au reboot contrairement à <strong>ip</strong>. Toujours faire <strong>nmcli con reload && nmcli con up</strong> après modification.', examples:[
+  { note:'Configurer une IP statique complète', input:`nmcli con mod ens33 ipv4.method manual \\
+  ipv4.addresses 192.168.1.10/24 \\
+  ipv4.gateway 192.168.1.1 \\
+  ipv4.dns "8.8.8.8 1.1.1.1"
+nmcli con reload && nmcli con up ens33`,
+    output:`Connection 'ens33' (uuid-xxx) successfully activated.` },
+  { note:'Vérifier la configuration réseau complète', input:'ip a show ens33 && ip route',
+    output:`2: <span class="out-hi">ens33</span>: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500
+    link/ether 00:0c:29:ab:cd:ef brd ff:ff:ff:ff:ff:ff
+    inet <span class="out-gold">192.168.1.10/24</span> brd 192.168.1.255 scope global noprefixroute ens33
+
+default via <span class="out-gold">192.168.1.1</span> dev ens33 proto static metric 100
+192.168.1.0/24 dev ens33 proto kernel scope link src 192.168.1.10` },
+  { note:'Lister toutes les connexions et leur statut', input:'nmcli device status',
+    output:`<span class="out-head">DEVICE  TYPE      STATE      CONNECTION</span>
+ens33   ethernet  <span class="out-hi">connected</span>  ens33
+lo      loopback  unmanaged  --` },
+]},
+
+{ cat:'network', cmd:'ss', syntax:'ss [OPTIONS]', short:'Afficher les connexions et ports ouverts', desc:'Remplace netstat. <strong>-tlnp</strong> = la combinaison magique : TCP, Listening, Numeric, Process. Indispensable pour déboguer les services réseau.', examples:[
+  { note:'Voir tous les ports en écoute avec le processus', input:'ss -tlnp',
+    output:`<span class="out-head">State  Recv-Q  Send-Q  Local Address:Port  Peer Address:Port  Process</span>
+LISTEN  0       128     0.0.0.0:<span class="out-gold">22</span>          0.0.0.0:*          users:(("<span class="out-hi">sshd</span>",pid=1234))
+LISTEN  0       128     0.0.0.0:<span class="out-gold">80</span>          0.0.0.0:*          users:(("<span class="out-hi">httpd</span>",pid=5678))
+LISTEN  0       128     0.0.0.0:<span class="out-gold">443</span>         0.0.0.0:*          users:(("<span class="out-hi">httpd</span>",pid=5678))` },
+  { note:'Voir les connexions établies', input:'ss -tnp state established',
+    output:`<span class="out-head">Recv-Q  Send-Q  Local Address:Port  Peer Address:Port   Process</span>
+0       0       192.168.1.10:<span class="out-gold">22</span>    192.168.1.5:<span class="out-hi">54321</span>   sshd` },
+]},
+
+// ── SERVICES ──
+{ cat:'services', cmd:'systemctl', syntax:'systemctl [COMMAND] [UNIT]', short:'Gérer les services systemd', desc:'LA commande de gestion des services sous RHEL. <strong>enable --now</strong> = activer ET démarrer en une seule commande. <strong>daemon-reload</strong> est obligatoire après modification d\'un unit file.', examples:[
+  { note:'Séquence complète pour gérer un service', input:'systemctl status sshd',
+    output:`● sshd.service - OpenSSH server daemon
+   Loaded: loaded (/usr/lib/systemd/system/sshd.service; <span class="out-hi">enabled</span>)
+   Active: <span class="out-hi">active (running)</span> since Mon 2025-01-15 09:00:00 CET; 2h 30min ago
+ Main PID: 1234 (sshd)
+    Tasks: 1
+   CGroup: /system.slice/sshd.service
+           └─1234 /usr/sbin/sshd -D` },
+  { note:'Activer et démarrer en une commande', input:'systemctl enable --now httpd\nsystemctl is-active httpd && systemctl is-enabled httpd',
+    output:`Created symlink /etc/systemd/system/multi-user.target.wants/httpd.service
+<span class="out-hi">active</span>
+<span class="out-hi">enabled</span>` },
+  { note:'Lister les services en erreur', input:'systemctl list-units --state=failed',
+    output:`<span class="out-head">  UNIT            LOAD   ACTIVE SUB    DESCRIPTION</span>
+<span class="out-red">● myapp.service   loaded failed failed My Application</span>
+
+LOAD   = Reflects whether the unit definition was properly loaded.
+ACTIVE = The high-level unit activation state.` },
+  { note:'Recharger après modification d\'un unit file', input:'systemctl daemon-reload\nsystemctl restart myapp',
+    output:`<span class="out-hi">[OK]</span> Unit files reloaded.
+<span class="out-hi">[OK]</span> myapp.service restarted.` },
+]},
+
+{ cat:'services', cmd:'journalctl', syntax:'journalctl [OPTIONS] [MATCHES]', short:'Consulter les logs systemd', desc:'Journal systemd centralisé. Beaucoup plus puissant que les anciens fichiers log. <strong>-xe</strong> pour déboguer immédiatement, <strong>-u service -f</strong> pour suivre en temps réel.', examples:[
+  { note:'Suivre les logs d\'un service en temps réel', input:'journalctl -u httpd -f',
+    output:`-- Logs begin at Mon 2025-01-15 08:00:00 CET. --
+Jan 15 09:00:01 server1 httpd[5678]: <span class="out-hi">AH00558</span>: httpd: Could not reliably determine...
+Jan 15 09:00:01 server1 systemd[1]: <span class="out-hi">Started</span> The Apache HTTP Server.
+Jan 15 09:30:15 server1 httpd[5678]: <span class="out-red">192.168.1.5 - - [GET /index.html 200]</span>` },
+  { note:'Voir les erreurs depuis le dernier boot', input:'journalctl -b -p err',
+    output:`Jan 15 08:00:01 server1 kernel: <span class="out-red">EXT4-fs error</span> (device sdb1): ...
+Jan 15 08:00:05 server1 kernel: <span class="out-red">SCSI error</span>: return code = 0x08000002` },
+  { note:'Filtrer par période de temps', input:'journalctl --since "2025-01-15 08:00" --until "2025-01-15 09:00"',
+    output:`-- Logs begin at Mon 2025-01-15 08:00:00 CET --
+Jan 15 08:00:01 server1 systemd[1]: Starting system...
+Jan 15 08:00:05 server1 kernel: Linux version 5.14.0-284...` },
+]},
+
+{ cat:'services', cmd:'crontab', syntax:'crontab [OPTIONS] / MIN HEURE JOUR MOIS JOUR-SEMAINE CMD', short:'Planifier des tâches répétitives', desc:'Format : <strong>* * * * *</strong> = minute(0-59) heure(0-23) jour-mois(1-31) mois(1-12) jour-semaine(0-7). Astérisque = toujours. */5 = toutes les 5 unités.', examples:[
+  { note:'Éditer le crontab et examples de syntaxe', input:'crontab -e\n# Quelques exemples :', 
+    output:`<span class="out-head">MINUTE  HEURE  JOUR-MOIS  MOIS  JOUR-SEM  COMMANDE</span>
+<span class="out-hi">0</span>       <span class="out-gold">2</span>     <span class="out-hi">*</span>          <span class="out-hi">*</span>     <span class="out-hi">*</span>         /scripts/backup.sh
+<span class="out-dim">↑ Tous les jours à 2h du matin</span>
+
+<span class="out-hi">*/5</span>     <span class="out-hi">*</span>     <span class="out-hi">*</span>          <span class="out-hi">*</span>     <span class="out-hi">*</span>         /scripts/check.sh
+<span class="out-dim">↑ Toutes les 5 minutes</span>
+
+<span class="out-hi">0</span>       <span class="out-gold">0</span>     <span class="out-hi">*</span>          <span class="out-hi">*</span>     <span class="out-hi">0</span>         /scripts/weekly.sh
+<span class="out-dim">↑ Tous les dimanches à minuit</span>
+
+<span class="out-hi">30</span>      <span class="out-gold">8</span>     <span class="out-hi">1</span>          <span class="out-hi">*</span>     <span class="out-hi">*</span>         /scripts/monthly.sh
+<span class="out-dim">↑ Le 1er de chaque mois à 8h30</span>` },
+]},
+
+// ── PROCESS ──
+{ cat:'process', cmd:'ps + top', syntax:'ps [OPTIONS] / top [OPTIONS]', short:'Surveiller les processus', desc:'ps = snapshot instantané, top = temps réel. <strong>ps aux</strong> est la commande standard. Dans top : M=tri mémoire, P=tri CPU, k=kill, q=quitter.', examples:[
+  { note:'Vue complète de tous les processus', input:'ps aux | head -8',
+    output:`<span class="out-head">USER    PID  %CPU %MEM    VSZ   RSS TTY   STAT  COMMAND</span>
+root      1   0.0  0.1 171820  3456 ?     Ss    /usr/lib/systemd/systemd
+root   1234   0.0  0.1  71432  2345 ?     Ss    /usr/sbin/sshd
+john   5678   0.3  1.2 756432 25234 pts/0 Sl   /usr/bin/python3 app.py
+root   9012   0.0  0.0  57200   976 pts/0 R+    ps aux` },
+  { note:'Trouver un processus et le tuer', input:'ps aux | grep httpd\nkill -9 5678',
+    output:`root <span class="out-gold">5678</span>  0.1  0.2  227460  5120 ?  Ss  <span class="out-hi">httpd</span>: (accept4)
+root  5679  0.0  0.1  225932  3456 ?  S   <span class="out-hi">httpd</span>: worker
+
+<span class="out-red">Killed</span>` },
+]},
+
+// ── SELINUX ──
+{ cat:'selinux', cmd:'SELinux complet', syntax:'getenforce | setenforce | chcon | restorecon | semanage', short:'Gestion complète de SELinux', desc:'SELinux = Mandatory Access Control. Mode <strong>Enforcing</strong> = bloque tout ce qui n\'est pas explicitement autorisé. Le type (3ème champ du contexte) est le plus important : <strong>httpd_sys_content_t</strong> pour les fichiers web, etc.', examples:[
+  { note:'Vérifier et changer le mode SELinux', input:'getenforce\nsetenforce 0\ngetenforce',
+    output:`Enforcing
+<span class="out-gold">Permissive</span>` },
+  { note:'Voir les contextes SELinux des fichiers web', input:'ls -Z /var/www/html/',
+    output:`<span class="out-hi">unconfined_u:object_r:httpd_sys_content_t:s0</span> index.html
+<span class="out-red">unconfined_u:object_r:user_home_t:s0</span> wrong_context.html
+<span class="out-dim">↑ Ce fichier sera bloqué par SELinux !</span>` },
+  { note:'Corriger le contexte et le rendre permanent', input:`semanage fcontext -a -t httpd_sys_content_t "/myapp(/.*)?"\nrestorecon -Rv /myapp`,
+    output:`Relabeled <span class="out-hi">/myapp</span> from <span class="out-red">user_home_t</span> to <span class="out-gold">httpd_sys_content_t</span>
+Relabeled /myapp/index.html ...` },
+  { note:'Activer un boolean SELinux de façon permanente', input:'setsebool -P httpd_can_network_connect on\ngetsebool httpd_can_network_connect',
+    output:`httpd_can_network_connect --> <span class="out-hi">on</span>` },
+  { note:'Analyser les refus SELinux', input:'ausearch -m avc -ts recent | tail -5',
+    output:`type=AVC msg=audit(1705312800.123:456): avc: <span class="out-red">denied</span> { read } for
+  pid=5678 comm="httpd"
+  path="/myapp/config.php"
+  scontext=system_u:system_r:<span class="out-gold">httpd_t</span>:s0
+  tcontext=unconfined_u:object_r:<span class="out-red">user_home_t</span>:s0
+  tclass=file permissive=0
+<span class="out-dim">→ Solution : changer le contexte de /myapp/config.php vers httpd_sys_content_t</span>` },
+]},
+
+// ── FIREWALL ──
+{ cat:'firewall', cmd:'firewall-cmd', syntax:'firewall-cmd [OPTIONS] [--permanent]', short:'Configurer firewalld', desc:'Toujours utiliser <strong>--permanent</strong> pour les changements persistants, puis <strong>--reload</strong> pour les appliquer. Sans --permanent, le changement est perdu au reboot !', examples:[
+  { note:'Workflow standard : ouvrir un port/service', input:`firewall-cmd --add-service=http --permanent
+firewall-cmd --add-service=https --permanent
+firewall-cmd --add-port=8080/tcp --permanent
+firewall-cmd --reload`,
+    output:`success
+success
+success
+success` },
+  { note:'Voir l\'état complet du pare-feu', input:'firewall-cmd --list-all',
+    output:`public (active)
+  target: default
+  interfaces: ens33
+  sources:
+  services: <span class="out-hi">cockpit dhcpv6-client http https ssh</span>
+  ports: <span class="out-gold">8080/tcp</span>
+  protocols:
+  rich rules:` },
+  { note:'Autoriser une IP source spécifique', input:'firewall-cmd --zone=public --add-source=192.168.1.0/24 --permanent\nfirewall-cmd --reload\nfirewall-cmd --list-all | grep sources',
+    output:`success
+success
+  sources: <span class="out-hi">192.168.1.0/24</span>` },
+]},
+
+// ── CONTAINERS ──
+{ cat:'containers', cmd:'podman', syntax:'podman [COMMAND] [OPTIONS]', short:'Gestion des containers sans démon', desc:'Podman = alternative à Docker, rootless, sans démon. <strong>-d</strong> = détaché, <strong>-p</strong> = port mapping, <strong>-v</strong> = volume, <strong>:Z</strong> = contexte SELinux pour les volumes.', examples:[
+  { note:'Workflow complet : lancer un container web', input:`podman pull nginx:latest
+podman run -d --name webserver \
+  -p 8080:80 \
+  -v /mydata:/usr/share/nginx/html:Z \
+  nginx:latest
+podman ps`,
+    output:`Trying to pull docker.io/library/nginx:latest...
+Getting image source signatures... <span class="out-hi">Done</span>
+
+<span class="out-hi">a1b2c3d4e5f6</span>
+
+<span class="out-head">CONTAINER ID  IMAGE   COMMAND               STATUS         PORTS                  NAMES</span>
+<span class="out-hi">a1b2c3d4e5f6</span>  nginx   nginx -g daemon off;  <span class="out-hi">Up 2 seconds</span>   0.0.0.0:<span class="out-gold">8080</span>->80/tcp  webserver` },
+  { note:'Intégrer un container avec systemd (persistent)', input:`podman generate systemd --name webserver --files --new
+mkdir -p ~/.config/systemd/user/
+cp container-webserver.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now container-webserver
+loginctl enable-linger $USER`,
+    output:`<span class="out-hi">/root/container-webserver.service</span>
+<span class="out-hi">Created symlink ...</span>
+<span class="out-hi">Started container-webserver.service</span>` },
+]},
+
+// ── BOOT ──
+{ cat:'boot', cmd:'Reset mot de passe root', syntax:'rd.break (au boot GRUB2)', short:'Procédure de récupération root', desc:'Procédure critique demandée à l\'examen ! Après chroot, ne pas oublier <strong>touch /.autorelabel</strong> sinon SELinux va bloquer la connexion après reboot.', examples:[
+  { note:'Procédure complète étape par étape', input:`# Étape 1 : Au menu GRUB, appuyer 'e' sur la ligne kernel
+# Ajouter à la fin de la ligne linux/vmlinuz :
+rd.break
+
+# Étape 2 : Ctrl+X pour booter, puis dans le shell emergency :
+mount -o remount,rw /sysroot
+chroot /sysroot
+passwd root          # ← Nouveau mot de passe
+touch /.autorelabel  # ← INDISPENSABLE pour SELinux !
+exit
+exit`,
+    output:`<span class="out-dim">[ OK ] Reached target Emergency Mode.</span>
+switch_root:/#
+
+mount: /sysroot mounted.
+
+sh-5.1# passwd root
+Changing password for user root.
+New password: <span class="out-gold">●●●●●●●●</span>
+Retype new password: <span class="out-gold">●●●●●●●●</span>
+<span class="out-hi">passwd: all authentication tokens updated successfully.</span>
+
+sh-5.1# touch /.autorelabel
+<span class="out-gold">[  Note  ]</span> SELinux relabeling sera effectué au prochain boot.
+
+<span class="out-hi">[ System rebooting... ]</span>` },
+]},
+
+{ cat:'boot', cmd:'systemctl targets', syntax:'systemctl [get/set]-default [target]', short:'Gérer les niveaux d\'exécution', desc:'Les targets remplacent les runlevels SysV. <strong>graphical.target</strong> = niveau 5, <strong>multi-user.target</strong> = niveau 3 (texte seulement). Savoir switcher est souvent demandé.', examples:[
+  { note:'Changer la target par défaut et isoler', input:'systemctl get-default\nsystemctl set-default multi-user.target\nsystemctl get-default',
+    output:`graphical.target
+Removed /etc/systemd/system/default.target.
+Created symlink ... → /usr/lib/systemd/system/<span class="out-hi">multi-user.target</span>
+multi-user.target` },
+  { note:'Équivalences runlevel ↔ target', input:'ls -la /usr/lib/systemd/system/runlevel*.target',
+    output:`runlevel0.target → <span class="out-hi">poweroff.target</span>
+runlevel1.target → <span class="out-hi">rescue.target</span>
+runlevel3.target → <span class="out-hi">multi-user.target</span>
+runlevel5.target → <span class="out-hi">graphical.target</span>
+runlevel6.target → <span class="out-hi">reboot.target</span>` },
+]},
+
+// ── SCRIPTING ──
+{ cat:'scripting', cmd:'Bash scripting complet', syntax:'#!/bin/bash', short:'Variables, conditions, boucles, fonctions', desc:'Scripts Bash pour l\'examen. Toujours commencer par le shebang <strong>#!/bin/bash</strong>. Rendre exécutable avec <strong>chmod +x</strong>. Tester avec <strong>bash -x script.sh</strong> pour déboguer.', examples:[
+  { note:'Script complet avec variables, conditions et boucles', input:`#!/bin/bash
+# Script de sauvegarde - TBINI Mustapha Amin
+
+BACKUP_DIR="/backup"
+DATE=$(date +%Y%m%d)
+LOG="/var/log/backup.log"
+
+mkdir -p $BACKUP_DIR
+
+for DIR in /home /etc /var/www; do
+  if [ -d "$DIR" ]; then
+    tar -czf "$BACKUP_DIR/$(basename $DIR)_$DATE.tar.gz" "$DIR"
+    echo "[$(date)] Backup OK : $DIR" >> $LOG
+  else
+    echo "[$(date)] ERREUR : $DIR inexistant" >> $LOG
+  fi
+done
+
+echo "Backup terminé : $DATE"`,
+    output:`<span class="out-hi">Backup terminé : 20250115</span>
+<span class="out-dim">cat /var/log/backup.log :</span>
+[2025-01-15 09:30:01] Backup OK : /home
+[2025-01-15 09:30:05] Backup OK : /etc
+[2025-01-15 09:30:10] Backup OK : /var/www` },
+  { note:'Redirections et pipes essentiels', input:`# Stdout → fichier (écrase)
+ls /etc > /tmp/liste.txt
+
+# Stderr vers /dev/null (supprimer erreurs)
+find / -name "*.log" 2>/dev/null
+
+# Stdout + Stderr dans le même fichier
+commande &> /tmp/output.txt
+
+# Pipe + tee (affiche ET sauvegarde)
+ps aux | grep httpd | tee /tmp/httpd_procs.txt`,
+    output:`<span class="out-dim">liste.txt créé avec le contenu de /etc</span>
+<span class="out-hi">/var/log/messages.log
+/var/log/secure.log</span>
+<span class="out-dim">output.txt contient stdout + stderr</span>
+root 5678 0.1 0.2 ... <span class="out-hi">httpd</span>  <span class="out-dim">← affiché ET sauvegardé</span>` },
+]},
+
+// ══════════════════════════════════════════
+// ── FILES — commandes manquantes ──
+// ══════════════════════════════════════════
+
+{ cat:'files', cmd:'cp', syntax:'cp [OPTIONS] SOURCE DEST', short:'Copier fichiers et répertoires', desc:'Copie des fichiers ou répertoires. <strong>-r</strong> = récursif (dossiers), <strong>-p</strong> = préserve permissions/timestamps, <strong>-a</strong> = archive (tout préserver).', examples:[
+  { note:'Copier un fichier simple', input:'cp /etc/hosts /tmp/hosts.bak\nls -la /tmp/hosts.bak',
+    output:`<span class="out-hi">-rw-r--r--</span> 1 root root 158 Jan 15 10:00 /tmp/hosts.bak` },
+  { note:'Copier un dossier entier en préservant tout', input:'cp -a /etc/ssh /tmp/ssh_backup\nls -la /tmp/ssh_backup/',
+    output:`total 32
+drwx--x--x. 2 root root  134 Jan 15 10:00 .
+<span class="out-hi">-rw-r--r--</span>. 1 root root 4136 Jan 10 08:00 ssh_config
+<span class="out-hi">-rw-------</span>. 1 root root  480 Jan 10 08:00 ssh_host_ed25519_key` },
+  { note:'Copier plusieurs fichiers dans un dossier', input:'cp -v /etc/{hosts,hostname,resolv.conf} /tmp/backup/',
+    output:`'/etc/hosts' -> '/tmp/backup/hosts'
+'/etc/hostname' -> '/tmp/backup/hostname'
+'/etc/resolv.conf' -> '/tmp/backup/resolv.conf'` },
+]},
+
+{ cat:'files', cmd:'mv', syntax:'mv [OPTIONS] SOURCE DEST', short:'Déplacer ou renommer', desc:'Déplace ou renomme fichiers/dossiers. Contrairement à cp, mv ne copie pas — il déplace (ou renomme si même système de fichiers).', examples:[
+  { note:'Renommer un fichier', input:'mv ancien.txt nouveau.txt\nls nouveau.txt',
+    output:`<span class="out-hi">nouveau.txt</span>` },
+  { note:'Déplacer avec confirmation si écrasement', input:'mv -i /tmp/fichier.txt /home/john/',
+    output:`mv: overwrite '/home/john/fichier.txt'? <span class="out-gold">y</span>` },
+  { note:'Déplacer plusieurs fichiers', input:'mv /tmp/f1.txt /tmp/f2.txt /tmp/f3.txt /home/john/',
+    output:`<span class="out-dim">[Aucun output si succès]
+Vérifier : ls /home/john/f*.txt</span>
+/home/john/f1.txt  /home/john/f2.txt  /home/john/f3.txt` },
+]},
+
+{ cat:'files', cmd:'rm', syntax:'rm [OPTIONS] FILE', short:'Supprimer des fichiers', desc:'Supprime des fichiers ou répertoires. <strong>Irréversible</strong> sous Linux — pas de corbeille en ligne de commande. Toujours vérifier avant <strong>rm -rf</strong> !', examples:[
+  { note:'Supprimer un fichier avec confirmation', input:'rm -i /tmp/fichier.txt',
+    output:`rm: remove regular file '/tmp/fichier.txt'? <span class="out-gold">y</span>` },
+  { note:'Supprimer un dossier entier', input:'rm -rf /tmp/old_backup/\nls /tmp/old_backup/',
+    output:`<span class="out-red">ls: cannot access '/tmp/old_backup/': No such file or directory</span>` },
+  { note:'Supprimer des fichiers par pattern', input:'rm -v /tmp/*.log',
+    output:`removed '/tmp/access.log'
+removed '/tmp/error.log'
+removed '/tmp/debug.log'` },
+]},
+
+{ cat:'files', cmd:'mkdir / rmdir', syntax:'mkdir [OPTIONS] DIR', short:'Créer / supprimer des répertoires', desc:'mkdir crée des répertoires. <strong>-p</strong> crée toute la hiérarchie. rmdir supprime uniquement les dossiers VIDES.', examples:[
+  { note:'Créer une hiérarchie complète', input:'mkdir -p /projet/src/{main,test,docs}\ntree /projet/',
+    output:`/projet/
+└── src/
+    ├── <span class="out-hi">docs/</span>
+    ├── <span class="out-hi">main/</span>
+    └── <span class="out-hi">test/</span>` },
+  { note:'Créer avec permissions spécifiques', input:'mkdir -m 750 /shared/private\nls -ld /shared/private',
+    output:`<span class="out-hi">drwxr-x---</span>. 2 root root 6 Jan 15 10:00 /shared/private` },
+]},
+
+{ cat:'files', cmd:'touch', syntax:'touch [OPTIONS] FILE', short:'Créer un fichier vide / modifier timestamp', desc:'Crée un fichier vide s\'il n\'existe pas, ou met à jour la date d\'accès/modification s\'il existe.', examples:[
+  { note:'Créer plusieurs fichiers vides', input:'touch /tmp/f1.txt /tmp/f2.txt /tmp/f3.txt\nls -la /tmp/f*.txt',
+    output:`<span class="out-hi">-rw-r--r--</span> 1 root root 0 Jan 15 <span class="out-gold">10:00</span> /tmp/f1.txt
+<span class="out-hi">-rw-r--r--</span> 1 root root 0 Jan 15 <span class="out-gold">10:00</span> /tmp/f2.txt
+<span class="out-hi">-rw-r--r--</span> 1 root root 0 Jan 15 <span class="out-gold">10:00</span> /tmp/f3.txt` },
+  { note:'Définir une date/heure précise', input:'touch -t 202501010800 rapport.txt\nls -la rapport.txt',
+    output:`<span class="out-hi">-rw-r--r--</span> 1 root root 0 <span class="out-gold">Jan  1 08:00</span> rapport.txt` },
+]},
+
+{ cat:'files', cmd:'ln', syntax:'ln [OPTIONS] TARGET LINK_NAME', short:'Créer des liens physiques et symboliques', desc:'<strong>Hard link</strong> : même inode, même données, survit à la suppression de l\'original. <strong>Soft link (symlink)</strong> : raccourci, pointe vers un chemin, cassé si l\'original est supprimé.', examples:[
+  { note:'Créer un lien symbolique', input:'ln -s /etc/nginx/nginx.conf /tmp/nginx.conf\nls -la /tmp/nginx.conf',
+    output:`<span class="out-hi">lrwxrwxrwx</span> 1 root root 21 Jan 15 10:00 /tmp/nginx.conf -> <span class="out-blue">/etc/nginx/nginx.conf</span>` },
+  { note:'Créer un hard link et comparer les inodes', input:'ln /etc/hosts /tmp/hosts_hard\nls -li /etc/hosts /tmp/hosts_hard',
+    output:`<span class="out-gold">131073</span> -rw-r--r-- <span class="out-hi">2</span> root root 158 Jan 10 08:00 /etc/hosts
+<span class="out-gold">131073</span> -rw-r--r-- <span class="out-hi">2</span> root root 158 Jan 10 08:00 /tmp/hosts_hard
+<span class="out-dim">↑ Même inode (131073) = même fichier physique</span>` },
+]},
+
+{ cat:'files', cmd:'cat / less / head / tail', syntax:'cat|less|head|tail [OPTIONS] FILE', short:'Lire le contenu des fichiers', desc:'Différentes façons de lire des fichiers. <strong>tail -f</strong> est indispensable pour surveiller les logs en temps réel.', examples:[
+  { note:'Afficher avec numéros de ligne', input:'cat -n /etc/passwd | head -5',
+    output:`     <span class="out-gold">1</span>  root:x:0:0:root:/root:/bin/bash
+     <span class="out-gold">2</span>  bin:x:1:1:bin:/bin:/sbin/nologin
+     <span class="out-gold">3</span>  daemon:x:2:2:daemon:/sbin:/sbin/nologin
+     <span class="out-gold">4</span>  adm:x:3:4:adm:/var/adm:/sbin/nologin
+     <span class="out-gold">5</span>  lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin` },
+  { note:'Surveiller les logs en temps réel', input:'tail -f /var/log/messages',
+    output:`Jan 15 10:00:01 server1 systemd[1]: Started Session 42 of user john.
+Jan 15 10:00:05 server1 sshd[1234]: <span class="out-hi">Accepted password</span> for john from 192.168.1.5
+Jan 15 10:00:06 server1 systemd[1]: Starting user-runtime-dir@1001.service...
+<span class="out-dim">^C pour arrêter</span>` },
+  { note:'Afficher les dernières lignes d\'un log', input:'tail -20 /var/log/secure | grep Failed',
+    output:`Jan 15 09:45:12 server1 sshd[9999]: <span class="out-red">Failed password</span> for root from 10.0.0.1 port 54321 ssh2
+Jan 15 09:45:15 server1 sshd[9999]: <span class="out-red">Failed password</span> for root from 10.0.0.1 port 54322 ssh2` },
+]},
+
+{ cat:'files', cmd:'wc / sort / uniq / cut / awk / sed', syntax:'cmd [OPTIONS] [FILE]', short:'Traitement de texte avancé', desc:'Outils de manipulation de texte. Souvent chaînés avec des pipes. <strong>Indispensables</strong> pour le scripting et l\'analyse de logs.', examples:[
+  { note:'wc — compter lignes, mots, caractères', input:'wc -l /etc/passwd\nwc -w /etc/passwd',
+    output:`<span class="out-gold">46</span> /etc/passwd
+<span class="out-gold">46</span> /etc/passwd` },
+  { note:'sort + uniq — trier et dédupliquer', input:'cat /var/log/secure | grep "Failed" | awk \'{print $11}\' | sort | uniq -c | sort -rn | head -5',
+    output:`     <span class="out-red">147</span> 192.168.10.50
+      <span class="out-red">89</span> 10.0.0.1
+      <span class="out-red">23</span> 172.16.0.100
+       <span class="out-gold">5</span> 192.168.1.200
+<span class="out-dim">↑ Les IP qui attaquent le plus par SSH</span>` },
+  { note:'cut — extraire des colonnes', input:"cut -d: -f1,3 /etc/passwd | head -5",
+    output:`root:<span class="out-gold">0</span>
+bin:<span class="out-gold">1</span>
+daemon:<span class="out-gold">2</span>
+adm:<span class="out-gold">3</span>
+john:<span class="out-gold">1001</span>` },
+  { note:'sed — remplacer du texte dans un fichier', input:"sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config\ngrep PermitRootLogin /etc/ssh/sshd_config",
+    output:`PermitRootLogin <span class="out-hi">no</span>` },
+  { note:'awk — traitement par colonnes', input:"df -h | awk 'NR>1 {print $5, $6}'",
+    output:`<span class="out-gold">45%</span> /
+<span class="out-gold">12%</span> /boot
+<span class="out-gold">2%</span> /tmp
+<span class="out-gold">78%</span> /var` },
+]},
+
+{ cat:'files', cmd:'which / whereis / type / locate', syntax:'which|whereis CMD', short:'Trouver l\'emplacement d\'une commande', desc:'Trouve où sont installées les commandes et binaires.', examples:[
+  { note:'Localiser un binaire', input:'which python3\nwhereis python3',
+    output:`<span class="out-hi">/usr/bin/python3</span>
+python3: /usr/bin/python3 /usr/lib/python3 /usr/share/man/man1/python3.1.gz` },
+  { note:'Trouver rapidement un fichier (base de données)', input:'updatedb && locate sshd_config',
+    output:`<span class="out-hi">/etc/ssh/sshd_config</span>
+/usr/share/man/man5/sshd_config.5.gz` },
+]},
+
+{ cat:'files', cmd:'diff / patch', syntax:'diff [OPTIONS] FILE1 FILE2', short:'Comparer des fichiers', desc:'diff compare deux fichiers ligne par ligne. patch applique les différences.', examples:[
+  { note:'Comparer deux fichiers de config', input:'diff /etc/hosts /tmp/hosts.bak',
+    output:`<span class="out-gold">3c3</span>
+< 192.168.1.10   server1.local
+---
+> 192.168.1.20   server1.local
+<span class="out-dim">↑ ligne 3 differ : fichier1 a .10, fichier2 a .20</span>` },
+  { note:'Diff lisible (format unifié)', input:'diff -u /etc/nginx/nginx.conf.orig /etc/nginx/nginx.conf',
+    output:`--- /etc/nginx/nginx.conf.orig	2025-01-10
++++ /etc/nginx/nginx.conf	2025-01-15
+@@ -1,5 +1,5 @@
+ worker_processes  1;
+-listen 80;
++listen <span class="out-hi">8080</span>;` },
+]},
+
+// ══════════════════════════════════════════
+// ── USERS — commandes manquantes ──
+// ══════════════════════════════════════════
+
+{ cat:'users', cmd:'su / sudo / visudo', syntax:'su [OPTIONS] [USER]', short:'Changer d\'identité utilisateur', desc:'<strong>su -</strong> = se connecter complètement en tant que root (avec son environnement). <strong>sudo</strong> = exécuter une seule commande en root. <strong>visudo</strong> = éditer /etc/sudoers de façon sécurisée.', examples:[
+  { note:'Se connecter en root avec son environnement complet', input:'su -\nwhoami\npwd',
+    output:`Password: <span class="out-gold">●●●●●</span>
+<span class="out-hi">root</span>
+<span class="out-hi">/root</span>` },
+  { note:'Configurer sudo pour un utilisateur', input:'visudo\n# Ajouter dans le fichier :',
+    output:`<span class="out-dim">## Syntax: user  ALL=(runas)  command</span>
+john    ALL=(ALL)   NOPASSWD: ALL        <span class="out-dim"># john peut tout faire sans mdp</span>
+alice   ALL=(ALL)   /usr/bin/systemctl   <span class="out-dim"># alice = seulement systemctl</span>
+%devs   ALL=(ALL)   /usr/bin/dnf         <span class="out-dim"># groupe devs = seulement dnf</span>` },
+  { note:'Vérifier les droits sudo d\'un user', input:'sudo -l -U john',
+    output:`Matching Defaults entries for john on server1:
+    !visiblepw, always_set_home, env_reset
+
+User john may run the following commands:
+    (ALL) <span class="out-hi">NOPASSWD: ALL</span>` },
+]},
+
+{ cat:'users', cmd:'id / groups / who / w / last', syntax:'id [USER] / who / w', short:'Informations sur les utilisateurs', desc:'Commandes d\'information sur les utilisateurs connectés et leurs identités.', examples:[
+  { note:'Voir toutes les infos d\'un utilisateur', input:'id john',
+    output:`uid=<span class="out-gold">1001</span>(john) gid=<span class="out-gold">1001</span>(john) groups=<span class="out-gold">1001</span>(john),10(<span class="out-hi">wheel</span>),989(<span class="out-hi">docker</span>),1002(<span class="out-hi">developers</span>)` },
+  { note:'Voir qui est connecté et ce qu\'il fait', input:'w',
+    output:`<span class="out-head"> 10:00:01 up 2:00,  2 users,  load average: 0.01, 0.02, 0.05</span>
+<span class="out-head">USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT</span>
+root     pts/0    192.168.1.5      09:00    0.00s  0.10s  0.01s <span class="out-hi">w</span>
+john     pts/1    192.168.1.6      09:30    5.00s  0.05s  0.00s <span class="out-hi">vim /etc/hosts</span>` },
+  { note:'Historique des connexions', input:'last | head -8',
+    output:`john     pts/1        192.168.1.6      Wed Jan 15 09:30   still logged in
+root     pts/0        192.168.1.5      Wed Jan 15 09:00   still logged in
+john     pts/0        192.168.1.6      Tue Jan 14 18:00 - 20:00  (02:00)
+reboot   system boot  5.14.0-284.el9   Mon Jan 13 08:00` },
+  { note:'Dernière connexion de chaque utilisateur', input:'lastlog | grep -v Never | head -5',
+    output:`<span class="out-head">Username         Port     From             Latest</span>
+root             pts/0    192.168.1.5      Wed Jan 15 09:00:00
+john             pts/1    192.168.1.6      Wed Jan 15 09:30:00` },
+]},
+
+{ cat:'users', cmd:'chage', syntax:'chage [OPTIONS] USER', short:'Politique d\'expiration des mots de passe', desc:'Gère les dates d\'expiration des comptes et mots de passe. Commande souvent demandée à l\'examen avec useradd.', examples:[
+  { note:'Voir la politique d\'expiration complète', input:'chage -l john',
+    output:`Last password change                    : Jan 15, 2025
+Password expires                        : <span class="out-gold">Apr 15, 2025</span>
+Password inactive                       : never
+Account expires                         : <span class="out-red">never</span>
+Minimum number of days between change   : 7
+Maximum number of days between change   : 90
+Number of days of warning before expiry : 14` },
+  { note:'Configurer une politique complète', input:'chage -M 90 -m 7 -W 14 -I 30 -E 2025-12-31 john',
+    output:`<span class="out-dim">Signification :
+-M 90    = mdp expire après 90 jours max
+-m 7     = attendre 7 jours minimum avant changement
+-W 14    = prévenir 14 jours avant expiration
+-I 30    = désactiver 30 jours après expiration
+-E date  = compte expire le 31/12/2025</span>` },
+  { note:'Forcer le changement au prochain login', input:'chage -d 0 john\n# Connexion de john :',
+    output:`WARNING: Your password has expired.
+You must change your password now and login again!
+Changing password for user john.
+Current password: <span class="out-gold">●●●●●</span>
+New password: <span class="out-gold">●●●●●●●●</span>` },
+]},
+
+// ══════════════════════════════════════════
+// ── PERMISSIONS — commandes manquantes ──
+// ══════════════════════════════════════════
+
+{ cat:'perms', cmd:'chown / chgrp', syntax:'chown [OPTIONS] USER[:GROUP] FILE', short:'Changer propriétaire et groupe', desc:'chown change le propriétaire (et optionnellement le groupe). chgrp change uniquement le groupe. <strong>-R</strong> = récursif sur tout un répertoire.', examples:[
+  { note:'Changer propriétaire et groupe en même temps', input:'chown john:developers /data/project\nls -la /data/',
+    output:`<span class="out-hi">drwxr-xr-x</span> 2 <span class="out-gold">john</span> <span class="out-gold">developers</span> 4096 Jan 15 10:00 project` },
+  { note:'Changer récursivement tout un répertoire', input:'chown -R john:john /home/john/\nls -la /home/',
+    output:`<span class="out-hi">drwx------</span> 15 <span class="out-gold">john john</span> 4096 Jan 15 10:00 john` },
+  { note:'Changer seulement le groupe', input:'chgrp -R developers /shared/code\nls -ld /shared/code',
+    output:`<span class="out-hi">drwxr-xr-x</span> 5 root <span class="out-gold">developers</span> 4096 Jan 15 10:00 /shared/code` },
+]},
+
+{ cat:'perms', cmd:'umask', syntax:'umask [MASK]', short:'Masque de permissions par défaut', desc:'umask définit les permissions qui seront RETIRÉES des nouveaux fichiers. <strong>0022</strong> = défaut RHEL (fichiers=644, dossiers=755). Se calcule : 666-umask=fichier, 777-umask=dossier.', examples:[
+  { note:'Voir et comprendre le umask actuel', input:'umask\numask -S',
+    output:`<span class="out-gold">0022</span>
+<span class="out-hi">u=rwx,g=rx,o=rx</span>
+<span class="out-dim">Calcul : fichier=666-022=644 (rw-r--r--)
+         dossier=777-022=755 (rwxr-xr-x)</span>` },
+  { note:'Changer le umask pour la session', input:'umask 027\ntouch testfile\nmkdir testdir\nls -la',
+    output:`<span class="out-hi">-rw-r-----</span> 1 root root    0 Jan 15 10:00 testfile   <span class="out-dim">(640)</span>
+<span class="out-hi">drwxr-x---</span> 2 root root 4096 Jan 15 10:00 testdir    <span class="out-dim">(750)</span>` },
+  { note:'Rendre le umask permanent pour un utilisateur', input:'echo "umask 027" >> /home/john/.bashrc\nsource /home/john/.bashrc',
+    output:`<span class="out-dim">[Aucun output — le umask 027 sera actif à chaque connexion de john]</span>` },
+]},
+
+// ══════════════════════════════════════════
+// ── STORAGE — commandes manquantes ──
+// ══════════════════════════════════════════
+
+{ cat:'storage', cmd:'fdisk / gdisk / parted', syntax:'fdisk /dev/sdX', short:'Partitionner des disques', desc:'<strong>fdisk</strong> = MBR (legacy, max 2TB). <strong>gdisk</strong> = GPT (moderne, recommandé). <strong>parted</strong> = les deux, non-interactif. Utiliser gdisk pour les nouveaux disques.', examples:[
+  { note:'Lister toutes les partitions', input:'fdisk -l',
+    output:`Disk /dev/sda: 20 GiB, 21474836480 bytes, 41943040 sectors
+<span class="out-head">Device     Boot   Start      End  Sectors  Size Id Type</span>
+/dev/sda1  *       2048  2099199  2097152    1G 83 <span class="out-hi">Linux</span>
+/dev/sda2       2099200 41943039 39843840   19G 8e <span class="out-hi">Linux LVM</span>
+
+Disk /dev/sdb: 20 GiB, 21474836480 bytes, 41943040 sectors
+<span class="out-gold">Disklabel type: dos</span>
+Disk identifier: 0x00000000
+<span class="out-dim">(Aucune partition)</span>` },
+  { note:'Créer une partition LVM avec fdisk', input:'fdisk /dev/sdb\n# Séquence de touches :',
+    output:`Command (m for help): <span class="out-gold">n</span>      ← nouvelle partition
+Partition type: <span class="out-gold">p</span>                ← primaire
+Partition number: <span class="out-gold">1</span>
+First sector: <span class="out-gold">ENTRÉE</span>            ← défaut
+Last sector: <span class="out-gold">+10G</span>              ← taille 10GB
+Command: <span class="out-gold">t</span>                    ← changer type
+Hex code: <span class="out-gold">8e</span>                  ← Linux LVM
+Command: <span class="out-gold">w</span>                    ← sauvegarder
+<span class="out-hi">The partition table has been altered.</span>` },
+  { note:'Utiliser parted (non-interactif)', input:'parted /dev/sdb mklabel gpt\nparted /dev/sdb mkpart primary xfs 0% 100%\nparted /dev/sdb print',
+    output:`Model: VMware Virtual disk (scsi)
+Disk /dev/sdb: 21.5GB
+Partition Table: <span class="out-hi">gpt</span>
+<span class="out-head">Number  Start   End     Size    File system  Name</span>
+ 1      1049kB  21.5GB  21.5GB               primary` },
+]},
+
+{ cat:'storage', cmd:'mkfs / mkswap / swapon', syntax:'mkfs.TYPE /dev/PARTITION', short:'Formater des partitions', desc:'Crée un système de fichiers sur une partition. XFS est le défaut RHEL 9. ext4 est toujours supporté. Le swap est un espace disque utilisé comme mémoire virtuelle.', examples:[
+  { note:'Formater en XFS (défaut RHEL)', input:'mkfs.xfs /dev/sdb1',
+    output:`meta-data=/dev/sdb1              isize=512    agcount=4, agsize=655360 blks
+data     =                       bsize=4096   blocks=2621440, imaxpct=25
+<span class="out-hi">Discarding blocks...</span>Done.` },
+  { note:'Formater en ext4', input:'mkfs.ext4 /dev/sdc1',
+    output:`mke2fs 1.46.5 (30-Dec-2021)
+Creating filesystem with 2621440 4k blocks and 655360 inodes
+Filesystem UUID: <span class="out-gold">a1b2c3d4-e5f6-7890-abcd-ef1234567890</span>
+<span class="out-hi">Writing superblocks and filesystem accounting information: done</span>` },
+  { note:'Créer et activer le swap', input:'mkswap /dev/sdb2\nswapon /dev/sdb2\nswapon --show',
+    output:`Setting up swapspace version 1, size = 2 GiB
+<span class="out-hi">no label</span>, UUID=xxxxxxxx
+
+<span class="out-head">NAME      TYPE  SIZE   USED PRIO</span>
+/dev/sdb2 partition <span class="out-gold">2G</span>  0B    -2` },
+]},
+
+{ cat:'storage', cmd:'mount / umount / blkid', syntax:'mount [OPTIONS] DEVICE MOUNTPOINT', short:'Monter et démonter des systèmes de fichiers', desc:'mount attache un système de fichiers à un point de montage. blkid affiche les UUID des partitions (nécessaire pour fstab).', examples:[
+  { note:'Monter une partition', input:'mkdir -p /data\nmount /dev/sdb1 /data\ndf -hT | grep /data',
+    output:`Filesystem     Type  Size  Used Avail Use% Mounted on
+/dev/sdb1      <span class="out-hi">xfs</span>    10G  104M  9.9G   2% <span class="out-gold">/data</span>` },
+  { note:'Obtenir les UUID pour fstab', input:'blkid',
+    output:`/dev/sda1: UUID="<span class="out-gold">11111111-aaaa-bbbb-cccc-dddddddddddd</span>" TYPE="<span class="out-hi">xfs</span>"
+/dev/sda2: UUID="<span class="out-gold">22222222-aaaa-bbbb-cccc-dddddddddddd</span>" TYPE="<span class="out-hi">LVM2_member</span>"
+/dev/sdb1: UUID="<span class="out-gold">33333333-aaaa-bbbb-cccc-dddddddddddd</span>" TYPE="<span class="out-hi">xfs</span>"` },
+  { note:'Monter en lecture seule + voir les options', input:'mount -o ro /dev/sdb1 /mnt/data\nmount | grep sdb1',
+    output:`/dev/sdb1 on /mnt/data type xfs (<span class="out-gold">ro</span>,relatime,attr2,inode64,noquota)` },
+  { note:'Démonter proprement', input:'umount /data\ndf -h | grep /data',
+    output:`<span class="out-dim">[Aucun résultat — /data est démonté]</span>` },
+]},
+
+{ cat:'storage', cmd:'df / du / lsblk', syntax:'df [OPTIONS] / du [OPTIONS] PATH', short:'Espace disque et arborescence', desc:'df = espace utilisé par les systèmes de fichiers montés. du = espace utilisé par des fichiers/dossiers spécifiques. lsblk = arborescence des disques.', examples:[
+  { note:'Vue complète de l\'espace disque', input:'df -hT',
+    output:`<span class="out-head">Filesystem            Type      Size  Used Avail Use% Mounted on</span>
+devtmpfs              devtmpfs  1.8G     0  1.8G   0% /dev
+tmpfs                 tmpfs     1.9G     0  1.9G   0% /dev/shm
+/dev/mapper/rhel-root xfs        17G  4.1G   13G  <span class="out-hi">25%</span> /
+/dev/sda1             xfs      1014M  261M  754M  <span class="out-gold">26%</span> /boot
+/dev/sdb1             xfs        10G  104M  9.9G   <span class="out-hi">2%</span> /data` },
+  { note:'Trouver les dossiers les plus volumineux', input:'du -sh /* 2>/dev/null | sort -rh | head -8',
+    output:`<span class="out-red">4.2G</span>	/usr
+<span class="out-red">1.8G</span>	/var
+<span class="out-gold">780M</span>	/lib
+<span class="out-gold">412M</span>	/lib64
+ <span class="out-hi">96M</span>	/etc
+ <span class="out-hi">64M</span>	/boot` },
+  { note:'Arborescence disques avec filesystem', input:'lsblk -f',
+    output:`<span class="out-head">NAME            FSTYPE      LABEL UUID                                   MOUNTPOINT</span>
+sda
+├─sda1          <span class="out-hi">xfs</span>               11111111-aaaa...                        /boot
+└─sda2          LVM2_member         22222222-aaaa...
+  ├─rhel-root   <span class="out-hi">xfs</span>               33333333-aaaa...                        /
+  └─rhel-swap   <span class="out-hi">swap</span>              44444444-aaaa...                        [SWAP]
+sdb             <span class="out-dim">(vide)</span>` },
+]},
+
+{ cat:'storage', cmd:'stratis', syntax:'stratis pool|filesystem COMMAND', short:'Gestion avancée avec Stratis', desc:'Stratis est le gestionnaire de stockage nouvelle génération de RHEL. Il combine LVM + XFS avec une interface simplifiée. Il gère automatiquement les thin provisioning.', examples:[
+  { note:'Créer un pool et un filesystem Stratis', input:`systemctl enable --now stratisd
+stratis pool create mypool /dev/sdc
+stratis filesystem create mypool myfs
+stratis filesystem list`,
+    output:`<span class="out-head">Pool Name  Name  Used     Created            Device                      UUID</span>
+<span class="out-hi">mypool</span>     myfs  546 MiB  Jan 15 2025 10:00  /stratis/mypool/myfs  <span class="out-gold">xxxx-yyyy</span>` },
+  { note:'Monter et rendre persistant', input:'mount /stratis/mypool/myfs /mydata\nstratis pool list',
+    output:`<span class="out-head">Name    Total Physical   Total Physical Used</span>
+<span class="out-hi">mypool</span>  <span class="out-gold">20 GiB</span>           546 MiB` },
+]},
+
+// ══════════════════════════════════════════
+// ── NETWORK — commandes manquantes ──
+// ══════════════════════════════════════════
+
+{ cat:'network', cmd:'ip addr / ip route / ip link', syntax:'ip [OBJECT] [COMMAND]', short:'Configuration réseau complète', desc:'La commande <strong>ip</strong> remplace ifconfig, route et arp. Les changements via ip sont temporaires — utiliser nmcli pour la persistance.', examples:[
+  { note:'Voir toutes les interfaces réseau', input:'ip addr show',
+    output:`1: <span class="out-hi">lo</span>: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536
+    link/loopback 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+
+2: <span class="out-hi">ens33</span>: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500
+    link/ether 00:0c:29:ab:cd:ef brd ff:ff:ff:ff:ff:ff
+    inet <span class="out-gold">192.168.1.10/24</span> brd 192.168.1.255 scope global ens33` },
+  { note:'Ajouter une IP temporaire', input:'ip addr add 10.0.0.1/24 dev ens33\nip addr show ens33 | grep inet',
+    output:`    inet <span class="out-gold">192.168.1.10/24</span> brd 192.168.1.255 scope global ens33
+    inet <span class="out-hi">10.0.0.1/24</span> scope global secondary ens33` },
+  { note:'Voir et modifier la table de routage', input:'ip route show',
+    output:`default via <span class="out-gold">192.168.1.1</span> dev ens33 proto static metric 100
+192.168.1.0/24 dev ens33 proto kernel scope link src 192.168.1.10` },
+  { note:'Activer/désactiver une interface', input:'ip link set ens37 down\nip link set ens37 up\nip link show ens37',
+    output:`2: ens37: &lt;BROADCAST,MULTICAST,<span class="out-hi">UP</span>,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP` },
+]},
+
+{ cat:'network', cmd:'hostnamectl / /etc/hosts', syntax:'hostnamectl [COMMAND]', short:'Hostname et résolution locale', desc:'Gestion du nom d\'hôte et de la résolution DNS locale. Le fichier <strong>/etc/hosts</strong> est consulté avant DNS (selon /etc/nsswitch.conf).', examples:[
+  { note:'Voir et changer le hostname', input:'hostnamectl\nhostnamectl set-hostname server1.example.com\nhostname',
+    output:`   Static hostname: server1.example.com
+         Icon name: computer-vm
+           Chassis: vm
+        Machine ID: a1b2c3d4e5f6...
+           Boot ID: xxxxxxxx...
+    Virtualization: vmware
+  Operating System: Red Hat Enterprise Linux 9.3
+<span class="out-hi">server1.example.com</span>` },
+  { note:'Configurer /etc/hosts pour résolution locale', input:'cat /etc/hosts',
+    output:`127.0.0.1   localhost localhost.localdomain
+<span class="out-gold">::1</span>         localhost localhost.localdomain
+
+<span class="out-hi">192.168.1.10</span>  server1.example.com  server1
+<span class="out-hi">192.168.1.20</span>  server2.example.com  server2
+<span class="out-hi">192.168.1.30</span>  db1.example.com      db1` },
+]},
+
+{ cat:'network', cmd:'ping / traceroute / dig / nmap', syntax:'ping [OPTIONS] HOST', short:'Diagnostic et test réseau', desc:'Outils essentiels pour diagnostiquer les problèmes réseau. <strong>ping</strong> = connectivité, <strong>traceroute</strong> = chemin, <strong>dig</strong> = DNS, <strong>nmap</strong> = scan de ports.', examples:[
+  { note:'Tester la connectivité', input:'ping -c 4 8.8.8.8',
+    output:`PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=118 time=<span class="out-hi">12.3 ms</span>
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=118 time=<span class="out-hi">11.9 ms</span>
+64 bytes from 8.8.8.8: icmp_seq=3 ttl=118 time=<span class="out-hi">12.1 ms</span>
+64 bytes from 8.8.8.8: icmp_seq=4 ttl=118 time=<span class="out-hi">12.4 ms</span>
+
+--- 8.8.8.8 ping statistics ---
+4 packets transmitted, 4 received, <span class="out-hi">0% packet loss</span>` },
+  { note:'Requête DNS complète', input:'dig example.com A',
+    output:`;; ANSWER SECTION:
+example.com.    3600    IN    <span class="out-hi">A</span>    <span class="out-gold">93.184.216.34</span>
+
+;; Query time: 12 msec
+;; SERVER: 8.8.8.8#53(8.8.8.8)` },
+  { note:'Scanner les ports ouverts d\'une machine', input:'nmap -sV 192.168.1.10',
+    output:`PORT     STATE  SERVICE    VERSION
+22/tcp   open   <span class="out-hi">ssh</span>        OpenSSH 8.7
+80/tcp   open   <span class="out-hi">http</span>       Apache httpd 2.4.53
+443/tcp  open   <span class="out-hi">https</span>      Apache httpd 2.4.53
+3306/tcp closed mysql` },
+]},
+
+{ cat:'network', cmd:'curl / wget', syntax:'curl [OPTIONS] URL', short:'Télécharger et tester des URLs', desc:'curl = transfert de données avec protocoles multiples. wget = téléchargement récursif. Très utiles pour tester des APIs et services web.', examples:[
+  { note:'Tester un serveur web et voir les headers', input:'curl -I http://localhost',
+    output:`HTTP/1.1 <span class="out-hi">200 OK</span>
+Date: Wed, 15 Jan 2025 10:00:00 GMT
+Server: <span class="out-gold">Apache/2.4.53 (Red Hat Enterprise Linux)</span>
+Content-Type: text/html; charset=UTF-8` },
+  { note:'Télécharger un fichier', input:'curl -o /tmp/index.html http://example.com\nwget -q http://example.com -O /tmp/index.html',
+    output:`  % Total  % Received  % Xferd  Average Speed
+100  1256  100  1256    0     0   8500      0  <span class="out-hi">--:--:--</span>` },
+  { note:'Tester une API REST', input:"curl -s -X GET 'http://api.example.com/users' -H 'Accept: application/json'",
+    output:`{
+  "users": [
+    {"id": 1, "name": "<span class="out-hi">john</span>", "email": "john@example.com"},
+    {"id": 2, "name": "<span class="out-hi">alice</span>", "email": "alice@example.com"}
+  ]
+}` },
+]},
+
+// ══════════════════════════════════════════
+// ── SERVICES — commandes manquantes ──
+// ══════════════════════════════════════════
+
+{ cat:'services', cmd:'at / atq / atrm', syntax:'at TIME', short:'Planifier une tâche unique', desc:'at exécute une commande <strong>une seule fois</strong> à un moment précis (contrairement à cron qui est récurrent). Utile pour des maintenances planifiées.', examples:[
+  { note:'Planifier une tâche pour dans 10 minutes', input:'echo "systemctl restart httpd" | at now + 10 minutes\natq',
+    output:`<span class="out-gold">job 1 at Wed Jan 15 10:10:00 2025</span>
+
+<span class="out-head">Num  Date                 Hour     Queue  User</span>
+<span class="out-hi">1</span>    Wed Jan 15 10:10:00  2025      a      root` },
+  { note:'Planifier à une heure précise', input:'at 23:30\n# Entrer la commande, puis Ctrl+D :',
+    output:`warning: commands will be executed using /bin/sh
+at> <span class="out-gold">/scripts/backup.sh</span>
+at> <span class="out-dim">&lt;Ctrl+D&gt;</span>
+job 2 at Wed Jan 15 23:30:00 2025` },
+  { note:'Voir et annuler des jobs at', input:'atq\natrm 2\natq',
+    output:`<span class="out-hi">1</span>   Wed Jan 15 10:10:00 2025 a root
+<span class="out-hi">2</span>   Wed Jan 15 23:30:00 2025 a root
+
+<span class="out-dim">[après atrm 2 :]</span>
+1   Wed Jan 15 10:10:00 2025 a root` },
+]},
+
+{ cat:'services', cmd:'dnf / rpm', syntax:'dnf [COMMAND] [PACKAGE]', short:'Gestion des paquets RPM', desc:'dnf = gestionnaire de paquets RHEL 9 (remplace yum). rpm = gestion directe des fichiers .rpm. <strong>dnf</strong> gère les dépendances automatiquement.', examples:[
+  { note:'Installer, mettre à jour, supprimer', input:'dnf install httpd -y\ndnf update httpd -y\ndnf remove httpd -y',
+    output:`Dependencies resolved.
+<span class="out-head">Package          Arch   Version         Repo     Size</span>
+Installing:
+<span class="out-hi">httpd</span>            x86_64 2.4.53-11.el9   appstream 54 k
+Installing dependencies:
+<span class="out-dim">httpd-core       x86_64 2.4.53-11.el9   appstream 1.4 M</span>
+
+<span class="out-hi">Complete!</span>` },
+  { note:'Chercher et obtenir infos sur un paquet', input:'dnf search nginx\ndnf info nginx',
+    output:`<span class="out-head">============ Name Matched: nginx ============</span>
+<span class="out-hi">nginx.x86_64</span> : A high performance web server
+
+Name         : nginx
+Version      : 1.20.1
+Release      : 14.el9
+Architecture : x86_64
+Size         : 1.8 M
+Summary      : A high performance web server
+URL          : http://nginx.org/` },
+  { note:'Lister les paquets installés et leurs fichiers', input:'rpm -qa | grep httpd\nrpm -ql httpd | head -8',
+    output:`<span class="out-hi">httpd-2.4.53-11.el9.x86_64</span>
+httpd-core-2.4.53-11.el9.x86_64
+
+/etc/httpd
+/etc/httpd/conf
+/etc/httpd/conf/httpd.conf
+/usr/sbin/httpd
+/var/www/html` },
+]},
+
+// ══════════════════════════════════════════
+// ── PROCESS — commandes manquantes ──
+// ══════════════════════════════════════════
+
+{ cat:'process', cmd:'kill / killall / pkill', syntax:'kill [SIGNAL] PID', short:'Envoyer des signaux aux processus', desc:'Les signaux contrôlent le comportement des processus. <strong>SIGTERM (15)</strong> = arrêt propre (catchable). <strong>SIGKILL (9)</strong> = force kill (non-catchable). Toujours essayer SIGTERM d\'abord !', examples:[
+  { note:'Envoyer SIGTERM puis SIGKILL si nécessaire', input:'kill 1234\nsleep 2\nkill -0 1234 2>/dev/null && kill -9 1234',
+    output:`<span class="out-dim">[SIGTERM envoyé au PID 1234]</span>
+<span class="out-dim">[Si encore vivant après 2s :]</span>
+<span class="out-red">Killed</span>` },
+  { note:'Lister tous les signaux', input:'kill -l',
+    output:` 1) <span class="out-hi">SIGHUP</span>   2) <span class="out-hi">SIGINT</span>   3) SIGQUIT   9) <span class="out-red">SIGKILL</span>
+15) <span class="out-gold">SIGTERM</span>  18) SIGCONT  19) SIGSTOP  20) SIGTSTP` },
+  { note:'Tuer un processus par nom', input:'pkill -f "python3 app.py"\nkillall httpd',
+    output:`<span class="out-dim">[Processus "python3 app.py" tué]
+[Tous les processus httpd tués]</span>` },
+]},
+
+{ cat:'process', cmd:'nice / renice / ionice', syntax:'nice -n N COMMAND / renice -n N -p PID', short:'Priorité des processus', desc:'La priorité (niceness) va de <strong>-20</strong> (max priorité) à <strong>19</strong> (min priorité). Seul root peut mettre des valeurs négatives. ionice gère la priorité I/O.', examples:[
+  { note:'Lancer une tâche lourde avec priorité basse', input:'nice -n 19 dd if=/dev/sda of=/backup/disk.img bs=1M &\nps -o pid,ni,cmd | grep dd',
+    output:`<span class="out-head">  PID  NI CMD</span>
+ 9876  <span class="out-gold">19</span> dd if=/dev/sda of=/backup/disk.img bs=1M` },
+  { note:'Changer la priorité d\'un processus en cours', input:'renice -n 10 -p 9876\nps -o pid,ni -p 9876',
+    output:`<span class="out-head">  PID  NI</span>
+ 9876  <span class="out-hi">10</span>` },
+]},
+
+{ cat:'process', cmd:'jobs / bg / fg / nohup', syntax:'command & / jobs / bg %N / fg %N', short:'Gestion des jobs foreground/background', desc:'Permet de gérer les processus en avant-plan et arrière-plan. <strong>nohup</strong> permet à un processus de continuer après déconnexion.', examples:[
+  { note:'Gérer les jobs en arrière-plan', input:'sleep 1000 &\nvim /etc/hosts &\njobs',
+    output:`[1]  Running    sleep 1000
+[2]+ Stopped   vim /etc/hosts` },
+  { note:'Ramener en avant-plan et suspendre', input:'fg %2\n# Ctrl+Z pour suspendre\nbg %2\njobs',
+    output:`vim /etc/hosts
+<span class="out-dim">^Z</span>
+[2]+ Stopped   vim /etc/hosts
+
+[1]  Running    sleep 1000
+[2]+ Running    vim /etc/hosts` },
+  { note:'Lancer une commande qui survit à la déconnexion', input:'nohup /scripts/long_backup.sh > /tmp/backup.log 2>&1 &\necho "PID: $!"',
+    output:`nohup: ignoring input and redirecting stderr to stdout
+PID: <span class="out-gold">12345</span>
+<span class="out-dim">→ Le script continue même si tu te déconnectes</span>` },
+]},
+
+{ cat:'process', cmd:'free / vmstat / iostat / uptime', syntax:'free -h / vmstat / iostat', short:'Surveiller les ressources système', desc:'Outils de monitoring des ressources : mémoire, CPU, I/O disque. Indispensables pour le diagnostic des performances.', examples:[
+  { note:'Voir la mémoire disponible', input:'free -h',
+    output:`<span class="out-head">               total        used        free      shared  buff/cache   available</span>
+Mem:           <span class="out-gold">7.6Gi</span>       2.1Gi       <span class="out-hi">4.2Gi</span>       156Mi       1.3Gi       5.1Gi
+Swap:          <span class="out-gold">2.0Gi</span>          0B       <span class="out-hi">2.0Gi</span>` },
+  { note:'Statistiques CPU et mémoire en temps réel', input:'vmstat 1 5',
+    output:`<span class="out-head">procs  memory          swap    io   system     cpu</span>
+<span class="out-head"> r  b   swpd   free   buff  cache   si   so    bi    bo   in    cs us sy id</span>
+ 0  0      0 4300000 102400 1300000   0    0     5    10  150  200  2  1 97
+ 1  0      0 4298000 102400 1300000   0    0     0     0  160  210  5  2 93` },
+  { note:'Charge système et uptime', input:'uptime',
+    output:` 10:00:01 up <span class="out-hi">2:30</span>,  2 users,  load average: <span class="out-gold">0.15</span>, 0.12, 0.10
+<span class="out-dim">↑ Load average : 1min, 5min, 15min (< nb_cores = OK)</span>` },
+]},
+
+// ══════════════════════════════════════════
+// ── SELINUX — commandes manquantes ──
+// ══════════════════════════════════════════
+
+{ cat:'selinux', cmd:'seinfo / sesearch', syntax:'seinfo [OPTIONS] / sesearch [OPTIONS]', short:'Explorer la policy SELinux', desc:'Outils pour explorer les règles SELinux. Permettent de comprendre quelles opérations sont autorisées entre quels domaines.', examples:[
+  { note:'Lister les types et domaines disponibles', input:'seinfo -t | grep httpd | head -10',
+    output:`<span class="out-hi">httpd_t</span>
+httpd_sys_content_t
+httpd_sys_rw_content_t
+httpd_log_t
+httpd_config_t
+httpd_exec_t` },
+  { note:'Chercher les règles pour httpd', input:'sesearch --allow --source httpd_t --target httpd_sys_content_t',
+    output:`allow <span class="out-hi">httpd_t</span> <span class="out-gold">httpd_sys_content_t</span>:<span class="out-hi">dir</span> { getattr ioctl lock open read search };
+allow <span class="out-hi">httpd_t</span> <span class="out-gold">httpd_sys_content_t</span>:<span class="out-hi">file</span> { getattr ioctl lock map open read };` },
+]},
+
+// ══════════════════════════════════════════
+// ── FIREWALL — commandes manquantes ──
+// ══════════════════════════════════════════
+
+{ cat:'firewall', cmd:'firewall-cmd zones avancé', syntax:'firewall-cmd --zone=ZONE [OPTIONS]', short:'Gestion avancée des zones et règles rich', desc:'Les zones définissent le niveau de confiance d\'une interface/source. Les règles rich permettent des conditions avancées (IP source, port, log).', examples:[
+  { note:'Gérer les zones et interfaces', input:'firewall-cmd --get-zones\nfirewall-cmd --get-active-zones',
+    output:`block dmz drop external home internal public trusted work
+<span class="out-hi">public</span>
+  interfaces: <span class="out-gold">ens33</span>` },
+  { note:'Créer une règle rich avancée', input:`firewall-cmd --add-rich-rule='rule family="ipv4" source address="192.168.1.0/24" service name="ssh" accept' --permanent
+firewall-cmd --reload
+firewall-cmd --list-rich-rules`,
+    output:`success
+success
+rule family="ipv4" source address="<span class="out-hi">192.168.1.0/24</span>" service name="<span class="out-gold">ssh</span>" accept` },
+  { note:'Bloquer une IP spécifique', input:`firewall-cmd --add-rich-rule='rule family="ipv4" source address="10.0.0.1" reject' --permanent
+firewall-cmd --reload`,
+    output:`success
+success
+<span class="out-dim">→ L'IP 10.0.0.1 sera bloquée</span>` },
+  { note:'Configurer le masquerading (NAT)', input:'firewall-cmd --zone=public --add-masquerade --permanent\nfirewall-cmd --reload\nfirewall-cmd --zone=public --query-masquerade',
+    output:`success
+success
+<span class="out-hi">yes</span>` },
+]},
+
+{ cat:'firewall', cmd:'iptables (info)', syntax:'iptables -L -n -v', short:'Voir les règles iptables sous-jacentes', desc:'firewalld utilise iptables/nftables en backend. Connaître les bases d\'iptables aide à comprendre ce qui se passe réellement.', examples:[
+  { note:'Voir les règles iptables générées par firewalld', input:'iptables -L INPUT -n -v | head -15',
+    output:`Chain INPUT (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            0.0.0.0/0     ctstate RELATED,ESTABLISHED
+    0     0 ACCEPT     all  --  lo     *       0.0.0.0/0            0.0.0.0/0
+    0     0 INPUT_direct  all  --  *    *       0.0.0.0/0            0.0.0.0/0
+    <span class="out-gold">4</span>   <span class="out-hi">240 ACCEPT</span>     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0     tcp dpt:22
+    <span class="out-gold">12</span>  <span class="out-hi">720 ACCEPT</span>     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0     tcp dpt:80` },
+]},
+
+// ══════════════════════════════════════════
+// ── CONTAINERS — commandes manquantes ──
+// ══════════════════════════════════════════
+
+{ cat:'containers', cmd:'podman images / build / push', syntax:'podman images / build / push', short:'Gérer les images Podman', desc:'Gestion complète des images : listing, construction depuis Containerfile (Dockerfile), tag et push vers un registry.', examples:[
+  { note:'Lister et supprimer des images', input:'podman images\npodman rmi nginx:latest',
+    output:`<span class="out-head">REPOSITORY                 TAG       IMAGE ID      CREATED       SIZE</span>
+docker.io/library/<span class="out-hi">nginx</span>   latest    a6bd71f48f68  2 weeks ago   187 MB
+docker.io/library/<span class="out-hi">httpd</span>   2.4       98f93cd0ec3b  3 weeks ago   145 MB
+
+Untagged: docker.io/library/nginx:latest
+Deleted: <span class="out-gold">a6bd71f48f68</span>` },
+  { note:'Construire une image depuis un Containerfile', input:'cat Containerfile\npodman build -t monapp:v1.0 .',
+    output:`FROM ubi9/ubi-minimal
+RUN microdnf install -y python3
+COPY app.py /app/
+CMD ["python3", "/app/app.py"]
+
+STEP 1/4: FROM ubi9/ubi-minimal
+STEP 2/4: RUN microdnf install -y python3
+<span class="out-hi">Complete!</span>
+STEP 3/4: COPY app.py /app/
+STEP 4/4: CMD ["python3", "/app/app.py"]
+<span class="out-hi">Successfully tagged monapp:v1.0</span>` },
+  { note:'Inspecter et exécuter des commandes dans un container', input:'podman exec -it webserver bash\npodman logs --tail 20 webserver\npodman stats webserver --no-stream',
+    output:`<span class="out-head">ID            NAME       CPU %   MEM USAGE / LIMIT   MEM %   NET I/O</span>
+<span class="out-hi">a1b2c3d4e5f6</span>  webserver  <span class="out-gold">0.15%</span>   45MB / 2GB          2.25%   1.2kB` },
+]},
+
+{ cat:'containers', cmd:'podman network / volume', syntax:'podman network ls / volume ls', short:'Réseaux et volumes Podman', desc:'Gestion des réseaux et volumes persistants pour les containers. Les volumes persistent après la suppression du container.', examples:[
+  { note:'Créer et utiliser un volume persistant', input:`podman volume create mydata
+podman run -d --name db \
+  -v mydata:/var/lib/mysql:Z \
+  -e MYSQL_ROOT_PASSWORD=secret \
+  mysql:8.0
+podman volume inspect mydata`,
+    output:`[
+  {
+    "Name": "<span class="out-hi">mydata</span>",
+    "Mountpoint": "/var/lib/containers/storage/volumes/mydata/_data",
+    "Driver": "local"
+  }
+]` },
+  { note:'Créer un réseau personnalisé', input:`podman network create mynet --subnet 172.20.0.0/16
+podman run -d --name web --network mynet nginx
+podman run -d --name db  --network mynet mysql:8.0
+podman network inspect mynet`,
+    output:`"Name": "<span class="out-hi">mynet</span>",
+"Subnet": "<span class="out-gold">172.20.0.0/16</span>",
+"Containers": {
+  "web": {"IPv4": "172.20.0.2"},
+  "db":  {"IPv4": "172.20.0.3"}
+}` },
+]},
+
+// ══════════════════════════════════════════
+// ── BOOT — commandes manquantes ──
+// ══════════════════════════════════════════
+
+{ cat:'boot', cmd:'GRUB2 configuration', syntax:'grub2-mkconfig / grubby', short:'Gérer le bootloader GRUB2', desc:'GRUB2 est le bootloader de RHEL. Ne jamais éditer /boot/grub2/grub.cfg directement — utiliser <strong>grub2-mkconfig</strong> ou <strong>grubby</strong>.', examples:[
+  { note:'Modifier les options kernel permanentes', input:'cat /etc/default/grub',
+    output:`GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR="$(sed 's, release .*$,,g' /etc/system-release)"
+GRUB_DEFAULT=saved
+GRUB_DISABLE_SUBMENU=true
+GRUB_TERMINAL_OUTPUT="console"
+<span class="out-hi">GRUB_CMDLINE_LINUX</span>="crashkernel=1G-4G:192M,4G-64G:256M rhgb quiet"` },
+  { note:'Régénérer grub.cfg après modification', input:'grub2-mkconfig -o /boot/grub2/grub.cfg\n# ou pour UEFI :',
+    output:`Generating grub configuration file ...
+<span class="out-hi">Adding boot menu entry for EFI firmware configuration</span>
+done` },
+  { note:'Gérer les kernels avec grubby', input:'grubby --default-kernel\ngrubby --info=ALL | grep kernel',
+    output:`<span class="out-hi">/boot/vmlinuz-5.14.0-284.30.1.el9_2.x86_64</span>
+
+kernel=<span class="out-hi">/boot/vmlinuz-5.14.0-284.30.1.el9_2.x86_64</span>
+kernel=/boot/vmlinuz-0-rescue-xxxx` },
+  { note:'Ajouter un paramètre kernel', input:'grubby --args="ipv6.disable=1" --update-kernel=ALL\ngrubby --info=ALL | grep args',
+    output:`args="ro crashkernel=auto rhgb quiet <span class="out-hi">ipv6.disable=1</span>"` },
+]},
+
+{ cat:'boot', cmd:'rescue / emergency mode', syntax:'systemctl rescue / systemctl emergency', short:'Modes de maintenance', desc:'Rescue mode = single-user avec services de base. Emergency mode = minimum absolu (seul le root filesystem en lecture seule). Utiles pour réparer un système cassé.', examples:[
+  { note:'Basculer en mode rescue (maintenance)', input:'systemctl rescue',
+    output:`Broadcast message from root@server1:
+
+The system is going down to <span class="out-gold">rescue mode</span> NOW!
+<span class="out-dim">→ Tous les utilisateurs connectés sont déconnectés
+→ Seul root peut se connecter
+→ Les services essentiels sont démarrés</span>` },
+  { note:'Paramètres GRUB pour le troubleshooting', input:'# À ajouter sur la ligne kernel dans GRUB :',
+    output:`<span class="out-hi">rd.break</span>          → Emergency shell avant montage de /sysroot
+<span class="out-hi">1</span> ou <span class="out-hi">single</span>       → Single-user mode (maintenance)
+<span class="out-hi">systemd.unit=rescue.target</span>  → Rescue mode
+<span class="out-hi">systemd.unit=emergency.target</span> → Emergency mode
+<span class="out-hi">init=/bin/bash</span>   → Shell direct (si systemd est cassé)` },
+]},
+
+// ══════════════════════════════════════════
+// ── SCRIPTING — commandes manquantes ──
+// ══════════════════════════════════════════
+
+{ cat:'scripting', cmd:'fonctions et arrays', syntax:'function NAME() { ... }', short:'Fonctions Bash et tableaux', desc:'Les fonctions évitent la répétition de code. Les tableaux (arrays) permettent de stocker plusieurs valeurs dans une variable.', examples:[
+  { note:'Déclarer et utiliser des fonctions', input:`#!/bin/bash
+
+log() {
+  echo "[$(date +%H:%M:%S)] $1" | tee -a /var/log/myscript.log
+}
+
+check_service() {
+  local svc=$1
+  if systemctl is-active --quiet "$svc"; then
+    log "OK: $svc est actif"
+  else
+    log "ERREUR: $svc est inactif - redémarrage..."
+    systemctl restart "$svc"
+  fi
+}
+
+check_service httpd
+check_service sshd`,
+    output:`[10:00:01] <span class="out-hi">OK: httpd est actif</span>
+[10:00:01] <span class="out-red">ERREUR: sshd est inactif - redémarrage...</span>` },
+  { note:'Utiliser les tableaux (arrays)', input:`#!/bin/bash
+SERVICES=("httpd" "sshd" "firewalld" "crond")
+
+for svc in "\${SERVICES[@]}"; do
+  STATUS=$(systemctl is-active $svc)
+  printf "%-15s %s\\n" "$svc" "$STATUS"
+done`,
+    output:`httpd           <span class="out-hi">active</span>
+sshd            <span class="out-hi">active</span>
+firewalld       <span class="out-hi">active</span>
+crond           <span class="out-hi">active</span>` },
+]},
+
+{ cat:'scripting', cmd:'arguments et exit codes', syntax:'$1 $2 $@ $# / exit N', short:'Arguments et codes de retour', desc:'Les scripts reçoivent des arguments via $1, $2... $# = nombre d\'arguments. Chaque commande retourne un exit code : <strong>0 = succès</strong>, <strong>non-zéro = erreur</strong>.', examples:[
+  { note:'Script avec gestion des arguments', input:`#!/bin/bash
+# Usage: ./backup.sh SOURCE DEST
+
+if [ $# -ne 2 ]; then
+  echo "Usage: $0 SOURCE DESTINATION"
+  exit 1
+fi
+
+SOURCE=$1
+DEST=$2
+
+if [ ! -d "$SOURCE" ]; then
+  echo "Erreur: $SOURCE n'existe pas"
+  exit 2
+fi
+
+tar -czf "$DEST/backup_$(date +%Y%m%d).tar.gz" "$SOURCE"
+echo "Backup réussi: $?"`,
+    output:`<span class="out-dim">./backup.sh</span>
+Usage: ./backup.sh SOURCE DESTINATION
+
+<span class="out-dim">./backup.sh /home /backup</span>
+Backup réussi: <span class="out-hi">0</span>` },
+  { note:'Vérifier le code de retour d\'une commande', input:`ping -c 1 8.8.8.8 &>/dev/null
+if [ $? -eq 0 ]; then
+  echo "Internet OK"
+else
+  echo "Pas d'internet !"
+fi
+
+# Forme raccourcie :
+ping -c 1 8.8.8.8 &>/dev/null && echo "OK" || echo "KO"`,
+    output:`Internet OK
+OK` },
+]},
+
+{ cat:'scripting', cmd:'here-doc / variables avancées', syntax:'<<EOF / $() / ${VAR:-default}', short:'Syntaxe avancée Bash', desc:'Techniques avancées : here-documents pour du texte multi-ligne, substitution de commandes, expansion de variables avec valeurs par défaut.', examples:[
+  { note:'Here-document (texte multi-ligne)', input:`cat <<EOF > /etc/motd
+===========================================
+  Serveur : $(hostname)
+  Env     : Production
+  Admin   : TBINI Mustapha Amin
+===========================================
+EOF
+cat /etc/motd`,
+    output:`===========================================
+  Serveur : <span class="out-hi">server1.example.com</span>
+  Env     : Production
+  Admin   : <span class="out-gold">TBINI Mustapha Amin</span>
+===========================================` },
+  { note:'Variables avec valeurs par défaut et substitution', input:`#!/bin/bash
+ENV=\${1:-production}          # défaut = "production"
+PORT=\${PORT:-8080}            # utilise $PORT si défini
+TIMESTAMP=\$(date +%Y%m%d_%H%M%S)
+HOSTNAME=\$(hostname -s)
+
+echo "Env: $ENV"
+echo "Port: $PORT"
+echo "Timestamp: $TIMESTAMP"
+echo "Host: $HOSTNAME"`,
+    output:`Env: <span class="out-gold">production</span>
+Port: <span class="out-gold">8080</span>
+Timestamp: <span class="out-hi">20250115_100001</span>
+Host: <span class="out-hi">server1</span>` },
+]},
+
+];
+
+// ─── RENDER CHAPTERS NAV ───
+const chapGrid = document.getElementById('chapters-grid');
+chapters.forEach((ch, i) => {
+  const count = cmds.filter(c => c.cat === ch.id).length;
+  chapGrid.innerHTML += `
+    <a href="#ch-${ch.id}" class="chapter-card">
+      <span class="ch-num">// ${String(i+1).padStart(2,'0')}</span>
+      <span class="ch-icon">${ch.icon}</span>
+      <div class="ch-name">${ch.name}</div>
+      <div class="ch-count">${count} commande${count>1?'s':''}</div>
+    </a>`;
+});
+
+// ─── RENDER COMMANDS ───
+const main = document.getElementById('commands');
+chapters.forEach((ch, ci) => {
+  const chCmds = cmds.filter(c => c.cat === ch.id);
+  if (!chCmds.length) return;
+  const section = document.createElement('section');
+  section.className = 'chapter-section';
+  section.id = `ch-${ch.id}`;
+  section.dataset.cat = ch.id;
+  section.innerHTML = `
+    <div class="chapter-title-bar">
+      <span class="ch-title-icon">${ch.icon}</span>
+      <span class="ch-title-text">${ch.name}</span>
+      <span class="ch-title-num">// ${String(ci+1).padStart(2,'0')}</span>
+    </div>
+    <div class="cmd-grid" id="grid-${ch.id}"></div>`;
+  main.appendChild(section);
+
+  const grid = section.querySelector('.cmd-grid');
+  chCmds.forEach((c, i) => {
+    const id = `cmd-${ch.id}-${i}`;
+    const card = document.createElement('div');
+    card.className = 'cmd-block';
+    card.id = id;
+    card.dataset.cat = ch.id;
+    card.dataset.cmd = c.cmd.toLowerCase();
+    card.dataset.short = c.short.toLowerCase();
+
+    let exHtml = c.examples.map(ex => {
+      const parts = ex.input.split(' ');
+      const cmdPart = parts[0];
+      const rest = parts.slice(1).join(' ');
+      return `
+      <div class="example-item">
+        <div class="ex-top">EXEMPLE</div>
+        ${ex.note ? `<div class="ex-note-text">→ ${ex.note}</div>` : ''}
+        <div class="terminal-block">
+          <div class="terminal-topbar">
+            <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+            <span class="terminal-filename">bash</span>
+          </div>
+          <div class="terminal-input">
+            <span class="prompt">root@server1</span><span class="prompt-sym">:~# </span><span class="cmd-text">${ex.input.replace(/\n/g, '\n<span class="prompt">root@server1</span><span class="prompt-sym">:~# </span>')}</span>
+          </div>
+          ${ex.output ? `<div class="terminal-output">${ex.output}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="cmd-header" onclick="toggleCmd('${id}')">
+        <span class="cmd-prompt">$</span>
+        <span class="cmd-name">${c.cmd}</span>
+        <span class="cmd-short">${c.short}</span>
+        <span class="cmd-toggle">▼</span>
+      </div>
+      <div class="cmd-body">
+        <div class="cmd-desc-bar">${c.desc}</div>
+        <div class="cmd-syntax-bar"><span class="label">SYNTAX</span> ${c.syntax}</div>
+        <div class="examples-list">${exHtml}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+});
+
+// ─── TOGGLE ───
+function toggleCmd(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// ─── SEARCH ───
+function filterCmds() {
+  const q = document.getElementById('search').value.toLowerCase();
+  let visible = 0;
+  document.querySelectorAll('.cmd-block').forEach(el => {
+    const match = !q || el.dataset.cmd.includes(q) || el.dataset.short.includes(q) || el.dataset.cat.includes(q);
+    el.classList.toggle('hidden', !match);
+    if (match) visible++;
+  });
+  document.querySelectorAll('.chapter-section').forEach(sec => {
+    const hasVisible = [...sec.querySelectorAll('.cmd-block')].some(el => !el.classList.contains('hidden'));
+    sec.classList.toggle('hidden', !hasVisible);
+  });
+  const rc = document.getElementById('result-count');
+  rc.innerHTML = q ? `<span>${visible}</span> résultat${visible!==1?'s':''} pour "<span>${q}</span>"` : '';
+}
+
+// ─── TOC ───
+const toc = document.getElementById('toc');
+chapters.forEach(ch => {
+  const d = document.createElement('div');
+  d.className = 'toc-dot';
+  d.title = ch.name;
+  d.onclick = () => document.getElementById(`ch-${ch.id}`)?.scrollIntoView({behavior:'smooth'});
+  toc.appendChild(d);
+});
+
+// ─── CURSOR ───
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px';
+  cur.style.top = e.clientY + 'px';
+  ring.style.left = e.clientX + 'px';
+  ring.style.top = e.clientY + 'px';
+});
+
+// ─── TOP BTN ───
+const topBtn = document.getElementById('top-btn');
+window.addEventListener('scroll', () => {
+  topBtn.classList.toggle('show', window.scrollY > 400);
+});
+
+// ─── ACTIVE TOC ───
+const dots = toc.querySelectorAll('.toc-dot');
+const sections = [...document.querySelectorAll('.chapter-section')];
+window.addEventListener('scroll', () => {
+  const pos = window.scrollY + 200;
+  sections.forEach((s, i) => {
+    if (pos >= s.offsetTop && pos < (s.offsetTop + s.offsetHeight)) {
+      dots.forEach(d => d.classList.remove('active'));
+      if (dots[i]) dots[i].classList.add('active');
+    }
+  });
+});
+</script>
+</body>
+</html>
